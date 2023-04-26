@@ -14,7 +14,7 @@
     /// <summary>
     /// This SQL builder can be used for mapping table and column names to their SQL counterparts.
     /// </summary>
-    public static class Sql
+    internal static class Sql
     {
         private static readonly Lazy<EntityDescriptor> _defaultEntityRegistration = new Lazy<EntityDescriptor>(OrmConfiguration.GetEntityDescriptor<FakeEntity>);
 
@@ -32,7 +32,7 @@
 
             return new FormattableParameter(
                 _defaultEntityRegistration.Value,
-                null, 
+                null,
                 sqlParameterName);
         }
 
@@ -49,8 +49,8 @@
             Validate.NotNullOrEmpty(sqlIdentifier, nameof(sqlIdentifier));
 
             return new FormattableIdentifier(
-                _defaultEntityRegistration.Value, 
-                null, 
+                _defaultEntityRegistration.Value,
+                null,
                 sqlIdentifier);
         }
 
@@ -97,14 +97,14 @@
         /// </summary>
         /// <param name="alias">An alias to be used instead of the table name.</param>
         /// <param name="entityMappingOverride">An optional override to the default entity mapping.</param>
-        [Obsolete("Recommended to use Entity<TEntity> with a proper format specifier.", error:false)]
+        [Obsolete("Recommended to use Entity<TEntity> with a proper format specifier.", error: false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Formattable Table<TEntity>(string? alias = null, EntityMapping<TEntity>? entityMappingOverride = null)
         {
             var entityDescriptor = OrmConfiguration.GetEntityDescriptor<TEntity>();
             return new FormattableEntity(
-                entityDescriptor, 
-                entityMappingOverride?.Registration, 
+                entityDescriptor,
+                entityMappingOverride?.Registration,
                 alias, FormatSpecifiers.TableOrAlias);
         }
 

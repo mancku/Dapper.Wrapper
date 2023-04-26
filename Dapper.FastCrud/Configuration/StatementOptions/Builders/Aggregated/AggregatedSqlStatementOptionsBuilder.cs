@@ -18,7 +18,7 @@
         /// Default constructor.
         /// </summary>
         protected AggregatedSqlStatementOptionsBuilder()
-        :base(OrmConfiguration.GetEntityDescriptor<TEntity>())
+        : base(OrmConfiguration.GetEntityDescriptor<TEntity>())
         {
             // change these lines and you might want to check AggregatedSqlStatementOptionsBuilder.WithEntityMappingOverride as well
             this.MainEntityFormatterResolver = this.StatementFormatter.RegisterResolver(this.EntityDescriptor, this.EntityRegistration, null);
@@ -51,10 +51,10 @@
             this.MainEntityAlias = mainEntityAlias;
 
             this.MainEntityFormatterResolver = this.StatementFormatter.ReplaceRegisteredResolver(
-                this.EntityDescriptor, 
-                this.EntityRegistration, 
-                oldAlias, 
-                this.EntityRegistration, 
+                this.EntityDescriptor,
+                this.EntityRegistration,
+                oldAlias,
+                this.EntityRegistration,
                 this.MainEntityAlias);
             this.StatementFormatter.SetActiveMainResolver(this.MainEntityFormatterResolver, false);
             return this.Builder;
@@ -117,7 +117,7 @@
             {
                 then(this.Builder);
             }
-            else if(otherwise != null)
+            else if (otherwise != null)
             {
                 otherwise(this.Builder);
             }
@@ -134,9 +134,20 @@
         }
 
         /// <summary>
+        /// Informs if the connection should use a transaction.
+        /// </summary>
+        /// <param name="shouldUseTransaction"></param>
+        /// <returns></returns>
+        public TStatementOptionsBuilder ShouldUseTransaction(bool shouldUseTransaction)
+        {
+            this.UseTransaction = shouldUseTransaction;
+            return this.Builder;
+        }
+
+        /// <summary>
         /// Attaches the current command to an existing transaction.
         /// </summary>
-        public TStatementOptionsBuilder AttachToTransaction(IDbTransaction? transaction)
+        internal TStatementOptionsBuilder AttachToTransaction(IDbTransaction? transaction)
         {
             this.Transaction = transaction;
             return this.Builder;
@@ -151,10 +162,10 @@
             var oldRegistration = this.EntityRegistration;
             this.EntityRegistration = entityMapping?.Registration!;
             this.MainEntityFormatterResolver = this.StatementFormatter.ReplaceRegisteredResolver(
-                this.EntityDescriptor, 
-                oldRegistration, 
-                this.MainEntityAlias, 
-                this.EntityRegistration, 
+                this.EntityDescriptor,
+                oldRegistration,
+                this.MainEntityAlias,
+                this.EntityRegistration,
                 this.MainEntityAlias);
             this.StatementFormatter.SetActiveMainResolver(this.MainEntityFormatterResolver, false);
             return this.Builder;

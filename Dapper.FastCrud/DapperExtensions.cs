@@ -15,7 +15,7 @@ namespace Dapper.FastCrud
     /// <summary>
     /// Class for Dapper extensions
     /// </summary>
-    public static class DapperExtensions
+    internal static class DapperExtensions
     {
         /// <summary>
         /// Queries the database for a single record based on its primary keys.
@@ -27,10 +27,15 @@ namespace Dapper.FastCrud
         public static TEntity? Get<TEntity>(
             this IDbConnection connection,
             TEntity entityKeys,
+            IDbTransaction? transaction = null,
             Action<ISelectSqlStatementOptionsBuilder<TEntity>>? statementOptions = null)
         {
             var options = new SelectSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
+            if (options.UseTransaction)
+            {
+                options.AttachToTransaction(transaction);
+            }
             var sqlStatements = GetStatements<TEntity>(options);
             return sqlStatements.SelectById(connection, entityKeys, options);
         }
@@ -46,10 +51,15 @@ namespace Dapper.FastCrud
         public static Task<TEntity?> GetAsync<TEntity>(
             this IDbConnection connection,
             TEntity entityKeys,
+            IDbTransaction? transaction = null,
             Action<ISelectSqlStatementOptionsBuilder<TEntity>>? statementOptions = null)
         {
             var options = new SelectSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
+            if (options.UseTransaction)
+            {
+                options.AttachToTransaction(transaction);
+            }
             var sqlStatements = GetStatements<TEntity>(options);
             return sqlStatements.SelectByIdAsync(connection, entityKeys, options);
         }
@@ -63,10 +73,15 @@ namespace Dapper.FastCrud
         public static void Insert<TEntity>(
             this IDbConnection connection,
             TEntity entityToInsert,
+            IDbTransaction? transaction = null,
             Action<IStandardSqlStatementOptionsBuilder<TEntity>>? statementOptions = null)
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
+            if (options.UseTransaction)
+            {
+                options.AttachToTransaction(transaction);
+            }
             var sqlStatements = GetStatements<TEntity>(options);
             sqlStatements.Insert(connection, entityToInsert, options);
         }
@@ -80,10 +95,15 @@ namespace Dapper.FastCrud
         public static Task InsertAsync<TEntity>(
             this IDbConnection connection,
             TEntity entityToInsert,
+            IDbTransaction? transaction = null,
             Action<IStandardSqlStatementOptionsBuilder<TEntity>>? statementOptions = null)
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
+            if (options.UseTransaction)
+            {
+                options.AttachToTransaction(transaction);
+            }
             var sqlStatements = GetStatements<TEntity>(options);
             return sqlStatements.InsertAsync(connection, entityToInsert, options);
         }
@@ -98,10 +118,15 @@ namespace Dapper.FastCrud
         public static bool Update<TEntity>(
             this IDbConnection connection,
             TEntity entityToUpdate,
+            IDbTransaction? transaction = null,
             Action<IStandardSqlStatementOptionsBuilder<TEntity>>? statementOptions = null)
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
+            if (options.UseTransaction)
+            {
+                options.AttachToTransaction(transaction);
+            }
             var sqlStatements = GetStatements<TEntity>(options);
             return sqlStatements.UpdateById(connection, entityToUpdate, options);
         }
@@ -119,10 +144,15 @@ namespace Dapper.FastCrud
         public static Task<bool> UpdateAsync<TEntity>(
             this IDbConnection connection,
             TEntity entityToUpdate,
+            IDbTransaction? transaction = null,
             Action<IStandardSqlStatementOptionsBuilder<TEntity>>? statementOptions = null)
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
+            if (options.UseTransaction)
+            {
+                options.AttachToTransaction(transaction);
+            }
             var sqlStatements = GetStatements<TEntity>(options);
             return sqlStatements.UpdateByIdAsync(connection, entityToUpdate, options);
         }
@@ -141,10 +171,15 @@ namespace Dapper.FastCrud
         public static int BulkUpdate<TEntity>(
             this IDbConnection connection,
             TEntity updateData,
+            IDbTransaction? transaction = null,
             Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>>? statementOptions = null)
         {
             var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
+            if (options.UseTransaction)
+            {
+                options.AttachToTransaction(transaction);
+            }
             var sqlStatements = GetStatements<TEntity>(options);
             return sqlStatements.BulkUpdate(connection, updateData, options);
         }
@@ -163,10 +198,15 @@ namespace Dapper.FastCrud
         public static Task<int> BulkUpdateAsync<TEntity>(
             this IDbConnection connection,
             TEntity updateData,
+            IDbTransaction? transaction = null,
             Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>>? statementOptions = null)
         {
             var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
+            if (options.UseTransaction)
+            {
+                options.AttachToTransaction(transaction);
+            }
             var sqlStatements = GetStatements<TEntity>(options);
             return sqlStatements.BulkUpdateAsync(connection, updateData, options);
         }
@@ -182,10 +222,15 @@ namespace Dapper.FastCrud
         public static bool Delete<TEntity>(
             this IDbConnection connection,
             TEntity entityToDelete,
+            IDbTransaction? transaction = null,
             Action<IStandardSqlStatementOptionsBuilder<TEntity>>? statementOptions = null)
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
+            if (options.UseTransaction)
+            {
+                options.AttachToTransaction(transaction);
+            }
             var sqlStatements = GetStatements<TEntity>(options);
             return sqlStatements.DeleteById(connection, entityToDelete, options);
         }
@@ -201,10 +246,15 @@ namespace Dapper.FastCrud
         public static Task<bool> DeleteAsync<TEntity>(
             this IDbConnection connection,
             TEntity entityToDelete,
+            IDbTransaction? transaction = null,
             Action<IStandardSqlStatementOptionsBuilder<TEntity>>? statementOptions = null)
         {
             var options = new StandardSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
+            if (options.UseTransaction)
+            {
+                options.AttachToTransaction(transaction);
+            }
             var sqlStatements = GetStatements<TEntity>(options);
             return sqlStatements.DeleteByIdAsync(connection, entityToDelete, options);
         }
@@ -218,10 +268,15 @@ namespace Dapper.FastCrud
         /// <returns>The number of records deleted.</returns>
         public static int BulkDelete<TEntity>(
             this IDbConnection connection,
+            IDbTransaction? transaction = null,
             Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>>? statementOptions = null)
         {
             var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
+            if (options.UseTransaction)
+            {
+                options.AttachToTransaction(transaction);
+            }
             var sqlStatements = GetStatements<TEntity>(options);
             return sqlStatements.BulkDelete(connection, options);
         }
@@ -235,10 +290,15 @@ namespace Dapper.FastCrud
         /// <returns>The number of records deleted.</returns>
         public static Task<int> BulkDeleteAsync<TEntity>(
             this IDbConnection connection,
+            IDbTransaction? transaction = null,
             Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>>? statementOptions = null)
         {
             var options = new ConditionalBulkSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
+            if (options.UseTransaction)
+            {
+                options.AttachToTransaction(transaction);
+            }
             var sqlStatements = GetStatements<TEntity>(options);
             return sqlStatements.BulkDeleteAsync(connection, options);
         }
@@ -252,10 +312,15 @@ namespace Dapper.FastCrud
         /// <returns>The record count</returns>
         public static int Count<TEntity>(
             this IDbConnection connection,
+            IDbTransaction? transaction = null,
             Action<IConditionalSqlStatementOptionsBuilder<TEntity>>? statementOptions = null)
         {
             var options = new ConditionalSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
+            if (options.UseTransaction)
+            {
+                options.AttachToTransaction(transaction);
+            }
             var sqlStatements = GetStatements<TEntity>(options);
             return sqlStatements.Count(connection, options);
         }
@@ -269,10 +334,15 @@ namespace Dapper.FastCrud
         /// <returns>The record count</returns>
         public static Task<int> CountAsync<TEntity>(
             this IDbConnection connection,
+            IDbTransaction? transaction = null,
             Action<IConditionalSqlStatementOptionsBuilder<TEntity>>? statementOptions = null)
         {
             var options = new ConditionalSqlStatementOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
+            if (options.UseTransaction)
+            {
+                options.AttachToTransaction(transaction);
+            }
             var sqlStatements = GetStatements<TEntity>(options);
             return sqlStatements.CountAsync(connection, options);
         }
@@ -286,10 +356,15 @@ namespace Dapper.FastCrud
         /// <returns>The record count</returns>
         public static IEnumerable<TEntity> Find<TEntity>(
             this IDbConnection connection,
+            IDbTransaction? transaction = null,
             Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>? statementOptions = null)
         {
             var options = new RangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
+            if (options.UseTransaction)
+            {
+                options.AttachToTransaction(transaction);
+            }
             var sqlStatements = GetStatements<TEntity>(options);
             return sqlStatements.BatchSelect(connection, options);
         }
@@ -303,10 +378,15 @@ namespace Dapper.FastCrud
         /// <returns>The record count</returns>
         public static Task<IEnumerable<TEntity>> FindAsync<TEntity>(
             this IDbConnection connection,
+            IDbTransaction? transaction = null,
             Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>? statementOptions = null)
         {
             var options = new RangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>();
             statementOptions?.Invoke(options);
+            if (options.UseTransaction)
+            {
+                options.AttachToTransaction(transaction);
+            }
             var sqlStatements = GetStatements<TEntity>(options);
             return sqlStatements.BatchSelectAsync(connection, options);
         }
