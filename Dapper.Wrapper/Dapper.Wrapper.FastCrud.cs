@@ -1,173 +1,173 @@
 ﻿namespace Dapper.Wrapper
 {
+    using FastCrud;
+    using FastCrud.Configuration.StatementOptions.Builders;
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Dapper.FastCrud;
     using System.Threading.Tasks;
-    using Dapper.FastCrud.Configuration.StatementOptions.Builders;
 
     public partial class DapperWrapper
     {
-        public IEnumerable<T> Find<T>(FormattableString? whereConditions = null, FormattableString? orderBy = null,
+        public IEnumerable<TEntity> Find<TEntity>(FormattableString? whereConditions = null, FormattableString? orderBy = null,
             bool isTransactional = false, TimeSpan? commandTimeout = null, long? top = null, long? skip = null)
         {
-            var options = this.SetRangedBatchSqlStatementOptions<T>(isTransactional, whereConditions, orderBy,
+            var options = SetRangedBatchSqlStatementOptions<TEntity>(isTransactional, whereConditions, orderBy,
                 commandTimeout, top, skip);
-            return this.GetConnection(isTransactional).Find(this.Transaction, options);
+            return this.GetConnection(isTransactional).Find(Transaction, options);
         }
 
-        public List<T> FindAsList<T>(FormattableString? whereConditions = null, FormattableString? orderBy = null,
+        public List<TEntity> FindAsList<TEntity>(FormattableString? whereConditions = null, FormattableString? orderBy = null,
             bool isTransactional = false, TimeSpan? commandTimeout = null, long? top = null, long? skip = null)
         {
-            return this.Find<T>(whereConditions, orderBy, isTransactional, commandTimeout, top, skip)
+            return this.Find<TEntity>(whereConditions, orderBy, isTransactional, commandTimeout, top, skip)
                 .ToList();
         }
 
-        public IEnumerable<T> Find<T>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<T>> options,
+        public IEnumerable<TEntity> Find<TEntity>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> options,
             bool isTransactional = false)
         {
-            return this.GetConnection(isTransactional).Find(this.Transaction, options);
+            return this.GetConnection(isTransactional).Find(Transaction, options);
         }
 
-        public List<T> FindAsList<T>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<T>> options,
+        public List<TEntity> FindAsList<TEntity>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> options,
             bool isTransactional = false)
         {
             return this.Find(options, isTransactional).ToList();
         }
 
-        public async Task<List<T>> FindAsListAsync<T>(FormattableString? whereConditions = null, FormattableString? orderBy = null,
+        public async Task<List<TEntity>> FindAsListAsync<TEntity>(FormattableString? whereConditions = null, FormattableString? orderBy = null,
             bool isTransactional = false, TimeSpan? commandTimeout = null, long? top = null, long? skip = null)
         {
-            var result = await this.FindAsync<T>(whereConditions, orderBy, isTransactional, commandTimeout, top, skip);
+            var result = await this.FindAsync<TEntity>(whereConditions, orderBy, isTransactional, commandTimeout, top, skip);
             return result.ToList();
         }
 
-        public async Task<IEnumerable<T>> FindAsync<T>(FormattableString? whereConditions = null, FormattableString? orderBy = null,
+        public async Task<IEnumerable<TEntity>> FindAsync<TEntity>(FormattableString? whereConditions = null, FormattableString? orderBy = null,
             bool isTransactional = false, TimeSpan? commandTimeout = null, long? top = null, long? skip = null)
         {
-            var options = this.SetRangedBatchSqlStatementOptions<T>(isTransactional, whereConditions,
+            var options = SetRangedBatchSqlStatementOptions<TEntity>(isTransactional, whereConditions,
                 orderBy, commandTimeout, top, skip);
-            return await this.GetConnection(isTransactional).FindAsync(this.Transaction, options);
+            return await this.GetConnection(isTransactional).FindAsync(Transaction, options);
         }
 
-        public async Task<List<T>> FindAsListAsync<T>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<T>> options)
+        public async Task<List<TEntity>> FindAsListAsync<TEntity>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> options)
         {
             var result = await this.FindAsync(options);
             return result.ToList();
         }
 
-        public async Task<IEnumerable<T>> FindAsync<T>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<T>> options)
+        public async Task<IEnumerable<TEntity>> FindAsync<TEntity>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> options)
         {
-            var standardOptions = options as Action<IStandardSqlStatementOptionsBuilder<T>>;
-            return await this.GetConnection(standardOptions).FindAsync(this.Transaction, options);
+            var standardOptions = options as Action<IStandardSqlStatementOptionsBuilder<TEntity>>;
+            return await this.GetConnection(standardOptions).FindAsync(Transaction, options);
         }
 
-        public T? Get<T>(T entityKeys, bool isTransactional = false, TimeSpan? commandTimeout = null)
+        public TEntity? Get<TEntity>(TEntity entityKeys, bool isTransactional = false, TimeSpan? commandTimeout = null)
         {
-            var options = this.SetSelectStatementOptions<T>(isTransactional, commandTimeout);
+            var options = SetSelectStatementOptions<TEntity>(isTransactional, commandTimeout);
             return this.Get(entityKeys, options);
         }
 
-        public T? Get<T>(T entityKeys, Action<ISelectSqlStatementOptionsBuilder<T>> options)
+        public TEntity? Get<TEntity>(TEntity entityKeys, Action<ISelectSqlStatementOptionsBuilder<TEntity>> options)
         {
-            var standardOptions = options as Action<IStandardSqlStatementOptionsBuilder<T>>;
-            return this.GetConnection(standardOptions).Get(entityKeys, this.Transaction, options);
+            var standardOptions = options as Action<IStandardSqlStatementOptionsBuilder<TEntity>>;
+            return this.GetConnection(standardOptions).Get(entityKeys, Transaction, options);
         }
 
-        public async Task<T?> GetAsync<T>(T entityKeys, bool isTransactional = false, TimeSpan? commandTimeout = null)
+        public async Task<TEntity?> GetAsync<TEntity>(TEntity entityKeys, bool isTransactional = false, TimeSpan? commandTimeout = null)
         {
-            var options = this.SetSelectStatementOptions<T>(isTransactional, commandTimeout);
+            var options = SetSelectStatementOptions<TEntity>(isTransactional, commandTimeout);
             return await this.GetAsync(entityKeys, options);
         }
 
-        public async Task<T?> GetAsync<T>(T entityKeys, Action<ISelectSqlStatementOptionsBuilder<T>> options)
+        public async Task<TEntity?> GetAsync<TEntity>(TEntity entityKeys, Action<ISelectSqlStatementOptionsBuilder<TEntity>> options)
         {
-            var standardOptions = options as Action<IStandardSqlStatementOptionsBuilder<T>>;
-            return await this.GetConnection(standardOptions).GetAsync(entityKeys, this.Transaction, options);
+            var standardOptions = options as Action<IStandardSqlStatementOptionsBuilder<TEntity>>;
+            return await this.GetConnection(standardOptions).GetAsync(entityKeys, Transaction, options);
         }
 
-        public int Count<T>(FormattableString? whereConditions = null,
+        public int Count<TEntity>(FormattableString? whereConditions = null,
             bool isTransactional = false, TimeSpan? commandTimeout = null)
         {
-            var options = this.SetConditionalSqlStatementOptions<T>(isTransactional, whereConditions, commandTimeout);
-            return this.GetConnection(isTransactional).Count(this.Transaction, options);
+            var options = SetConditionalSqlStatementOptions<TEntity>(isTransactional, whereConditions, commandTimeout);
+            return this.GetConnection(isTransactional).Count(Transaction, options);
         }
 
-        public async Task<int> CountAsync<T>(FormattableString? whereConditions = null,
+        public async Task<int> CountAsync<TEntity>(FormattableString? whereConditions = null,
             bool isTransactional = false, TimeSpan? commandTimeout = null)
         {
-            var options = this.SetConditionalSqlStatementOptions<T>(isTransactional, whereConditions, commandTimeout);
-            return await this.GetConnection(isTransactional).CountAsync(this.Transaction, options);
+            var options = SetConditionalSqlStatementOptions<TEntity>(isTransactional, whereConditions, commandTimeout);
+            return await this.GetConnection(isTransactional).CountAsync(Transaction, options);
         }
 
-        public void Insert<T>(T objectToInsert, bool isTransactional = true, TimeSpan? commandTimeout = null)
+        public void Insert<TEntity>(TEntity objectToInsert, bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
-            var options = this.SetStandardStatementOptions<T>(isTransactional, commandTimeout);
-            this.GetConnection(isTransactional).Insert(objectToInsert, this.Transaction, options);
+            var options = SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
+            this.GetConnection(isTransactional).Insert(objectToInsert, Transaction, options);
         }
 
-        public async Task InsertAsync<T>(T objectToInsert, bool isTransactional = true, TimeSpan? commandTimeout = null)
+        public async Task InsertAsync<TEntity>(TEntity objectToInsert, bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
-            var options = this.SetStandardStatementOptions<T>(isTransactional, commandTimeout);
-            await this.GetConnection(isTransactional).InsertAsync(objectToInsert, this.Transaction, options);
+            var options = SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
+            await this.GetConnection(isTransactional).InsertAsync(objectToInsert, Transaction, options);
         }
 
-        public bool Update<T>(T objectToUpdate, bool isTransactional = true, TimeSpan? commandTimeout = null)
+        public bool Update<TEntity>(TEntity objectToUpdate, bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
-            var options = this.SetStandardStatementOptions<T>(isTransactional, commandTimeout);
-            return this.GetConnection(isTransactional).Update(objectToUpdate, this.Transaction, options);
+            var options = SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
+            return this.GetConnection(isTransactional).Update(objectToUpdate, Transaction, options);
         }
 
-        public async Task<bool> UpdateAsync<T>(T objectToUpdate, bool isTransactional = true,
+        public async Task<bool> UpdateAsync<TEntity>(TEntity objectToUpdate, bool isTransactional = true,
             TimeSpan? commandTimeout = null)
         {
-            var options = this.SetStandardStatementOptions<T>(isTransactional, commandTimeout);
-            return await this.GetConnection(isTransactional).UpdateAsync(objectToUpdate, this.Transaction, options);
+            var options = SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
+            return await this.GetConnection(isTransactional).UpdateAsync(objectToUpdate, Transaction, options);
         }
 
-        public int BulkUpdate<T>(T objectToUpdate, FormattableString? whereConditions, bool isTransactional = true,
+        public int BulkUpdate<TEntity>(TEntity objectToUpdate, FormattableString? whereConditions, bool isTransactional = true,
             TimeSpan? commandTimeout = null)
         {
-            var options = this.SetConditionalBulkStatementOptions<T>(isTransactional, whereConditions, commandTimeout);
-            return this.GetConnection(isTransactional).BulkUpdate(objectToUpdate, this.Transaction, options);
+            var options = SetConditionalBulkStatementOptions<TEntity>(isTransactional, whereConditions, commandTimeout);
+            return this.GetConnection(isTransactional).BulkUpdate(objectToUpdate, Transaction, options);
         }
 
-        public async Task<int> BulkUpdateAsync<T>(T objectToUpdate, FormattableString? whereConditions,
+        public async Task<int> BulkUpdateAsync<TEntity>(TEntity objectToUpdate, FormattableString? whereConditions,
             bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
-            var options = this.SetConditionalBulkStatementOptions<T>(isTransactional, whereConditions, commandTimeout);
-            return await this.GetConnection(isTransactional).BulkUpdateAsync(objectToUpdate, this.Transaction, options);
+            var options = SetConditionalBulkStatementOptions<TEntity>(isTransactional, whereConditions, commandTimeout);
+            return await this.GetConnection(isTransactional).BulkUpdateAsync(objectToUpdate, Transaction, options);
         }
 
-        public bool Delete<T>(T objectToDelete, bool isTransactional = true, TimeSpan? commandTimeout = null)
+        public bool Delete<TEntity>(TEntity objectToDelete, bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
-            var options = this.SetStandardStatementOptions<T>(isTransactional, commandTimeout);
-            return this.GetConnection(isTransactional).Delete(objectToDelete, this.Transaction, options);
+            var options = SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
+            return this.GetConnection(isTransactional).Delete(objectToDelete, Transaction, options);
         }
 
-        public async Task<bool> DeleteAsync<T>(T objectToDelete, bool isTransactional = true,
+        public async Task<bool> DeleteAsync<TEntity>(TEntity objectToDelete, bool isTransactional = true,
             TimeSpan? commandTimeout = null)
         {
-            var options = this.SetStandardStatementOptions<T>(isTransactional, commandTimeout);
-            return await this.GetConnection(isTransactional).DeleteAsync(objectToDelete, this.Transaction, options);
+            var options = SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
+            return await this.GetConnection(isTransactional).DeleteAsync(objectToDelete, Transaction, options);
         }
 
-        public int BulkDelete<T>(FormattableString? whereConditions, bool isTransactional = true,
+        public int BulkDelete<TEntity>(FormattableString? whereConditions, bool isTransactional = true,
             TimeSpan? commandTimeout = null)
         {
-            var options = this.SetConditionalBulkStatementOptions<T>(isTransactional, whereConditions, commandTimeout);
-            return this.GetConnection(isTransactional).BulkDelete(this.Transaction, options);
+            var options = SetConditionalBulkStatementOptions<TEntity>(isTransactional, whereConditions, commandTimeout);
+            return this.GetConnection(isTransactional).BulkDelete(Transaction, options);
         }
 
-        public async Task<int> BulkDeleteAsync<T>(FormattableString? whereConditions, bool isTransactional = true,
+        public async Task<int> BulkDeleteAsync<TEntity>(FormattableString? whereConditions, bool isTransactional = true,
             TimeSpan? commandTimeout = null)
         {
-            var options = this.SetConditionalBulkStatementOptions<T>(isTransactional, whereConditions, commandTimeout);
-            return await this.GetConnection(isTransactional).BulkDeleteAsync(this.Transaction, options);
+            var options = SetConditionalBulkStatementOptions<TEntity>(isTransactional, whereConditions, commandTimeout);
+            return await this.GetConnection(isTransactional).BulkDeleteAsync(Transaction, options);
         }
 
-        private Action<IConditionalBulkSqlStatementOptionsBuilder<T>> SetConditionalBulkStatementOptions<T>(
+        private static Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>> SetConditionalBulkStatementOptions<TEntity>(
           bool useCurrentTransaction = false, FormattableString? whereConditions = null,
           TimeSpan? commandTimeout = null)
         {
@@ -183,7 +183,7 @@
             };
         }
 
-        private Action<IStandardSqlStatementOptionsBuilder<T>> SetStandardStatementOptions<T>(
+        private static Action<IStandardSqlStatementOptionsBuilder<TEntity>> SetStandardStatementOptions<TEntity>(
             bool useCurrentTransaction = false, TimeSpan? commandTimeout = null)
         {
             return query =>
@@ -193,7 +193,7 @@
             };
         }
 
-        private Action<ISelectSqlStatementOptionsBuilder<T>> SetSelectStatementOptions<T>(
+        private static Action<ISelectSqlStatementOptionsBuilder<TEntity>> SetSelectStatementOptions<TEntity>(
             bool useCurrentTransaction = false, TimeSpan? commandTimeout = null)
         {
             return query =>
@@ -203,7 +203,7 @@
             };
         }
 
-        private Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<T>> SetRangedBatchSqlStatementOptions<T>(
+        private static Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> SetRangedBatchSqlStatementOptions<TEntity>(
             bool useCurrentTransaction = false, FormattableString? whereConditions = null, FormattableString? orderBy = null,
             TimeSpan? commandTimeout = null, long? top = null, long? skip = null)
         {
@@ -218,7 +218,7 @@
             };
         }
 
-        private Action<IConditionalSqlStatementOptionsBuilder<T>> SetConditionalSqlStatementOptions<T>(
+        private static Action<IConditionalSqlStatementOptionsBuilder<TEntity>> SetConditionalSqlStatementOptions<TEntity>(
             bool useCurrentTransaction = false, FormattableString? whereConditions = null,
             TimeSpan? commandTimeout = null)
         {

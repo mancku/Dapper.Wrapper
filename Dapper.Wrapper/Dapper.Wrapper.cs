@@ -1,12 +1,12 @@
 ﻿namespace Dapper.Wrapper
 {
-    using Dapper.FastCrud;
+    using FastCrud;
+    using Microsoft.Extensions.Configuration;
     using System;
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Configuration;
 
     public partial class DapperWrapper : IDisposable
     {
@@ -30,9 +30,11 @@
             this.OpenConnection(connectionString, false);
         }
 
-        public IDbTransaction Transaction = null!;
-        public IDbConnection TransactionalConnection { get; set; } = null!;
-        public IDbConnection Connection { get; set; } = null!;
+        protected IDbTransaction? Transaction;
+
+        protected IDbConnection TransactionalConnection { get; set; }
+
+        protected IDbConnection Connection { get; set; }
 
         public void CommitChanges()
         {
@@ -46,8 +48,8 @@
 
         public void Dispose()
         {
-            this.TransactionalConnection?.Dispose();
-            this.Connection?.Dispose();
+            this.TransactionalConnection.Dispose();
+            this.Connection.Dispose();
         }
 
         public int Execute(string query,
@@ -58,7 +60,7 @@
         {
             return this.GetConnection(useTransaction).Execute(query,
                 parameters,
-                useTransaction ? this.Transaction : null,
+                this.GetTransaction(useTransaction),
                 commandTimeout,
                 commandType);
         }
@@ -71,83 +73,83 @@
         {
             return await this.GetConnection(useTransaction).ExecuteAsync(query,
                 parameters,
-                useTransaction ? this.Transaction : null,
+                this.GetTransaction(useTransaction),
                 commandTimeout,
                 commandType);
         }
 
-        public IEnumerable<T> ExecuteQuery<T>(string query,
+        public IEnumerable<TEntity> ExecuteQuery<TEntity>(string query,
             object? parameters = null,
             bool useTransaction = false,
             int? commandTimeout = null,
             CommandType? commandType = null)
         {
-            return this.GetConnection(useTransaction).Query<T>(query,
+            return this.GetConnection(useTransaction).Query<TEntity>(query,
                 parameters,
-                useTransaction ? this.Transaction : null,
+                this.GetTransaction(useTransaction),
                 false,
                 commandTimeout,
                 commandType);
         }
 
-        public List<T> ExecuteQueryAsList<T>(string query,
+        public List<TEntity> ExecuteQueryAsList<TEntity>(string query,
             object? parameters = null,
             bool useTransaction = false,
             int? commandTimeout = null,
             CommandType? commandType = null)
         {
-            return this.ExecuteQuery<T>(query, parameters, useTransaction, commandTimeout, commandType)
+            return this.ExecuteQuery<TEntity>(query, parameters, useTransaction, commandTimeout, commandType)
                 .ToList();
         }
 
-        public async Task<IEnumerable<T>> ExecuteQueryAsync<T>(string query,
+        public async Task<IEnumerable<TEntity>> ExecuteQueryAsync<TEntity>(string query,
             object? parameters = null,
             bool useTransaction = false,
             int? commandTimeout = null,
             CommandType? commandType = null)
         {
-            return await this.GetConnection(useTransaction).QueryAsync<T>(query,
+            return await this.GetConnection(useTransaction).QueryAsync<TEntity>(query,
                 parameters,
-                useTransaction ? this.Transaction : null,
+                this.GetTransaction(useTransaction),
                 commandTimeout,
                 commandType);
         }
 
-        public async Task<List<T>> ExecuteQueryAsListAsync<T>(string query,
+        public async Task<List<TEntity>> ExecuteQueryAsListAsync<TEntity>(string query,
             object? parameters = null,
             bool useTransaction = false,
             int? commandTimeout = null,
             CommandType? commandType = null)
         {
             var result =
-                await this.ExecuteQueryAsync<T>(query, parameters, useTransaction, commandTimeout, commandType);
+                await this.ExecuteQueryAsync<TEntity>(query, parameters, useTransaction, commandTimeout, commandType);
 
             return result.ToList();
         }
 
-        public async Task<List<T>> QueryMultipleAsync<T>(string query,
-            Func<SqlMapper.GridReader, List<T>> queryMultipleResolver, bool useTransaction = false)
+        public async Task<List<TEntity>> QueryMultipleAsync<TEntity>(string query,
+            Func<SqlMapper.GridReader, List<TEntity>> queryMultipleResolver, bool useTransaction = false)
         {
             using var multi = await this.GetConnection(useTransaction).QueryMultipleAsync(query);
             return queryMultipleResolver(multi);
         }
 
-        public T ExecuteScalar<T>(string query, object? parameters = null, bool useTransaction = false,
+        public TEntity ExecuteScalar<TEntity>(string query, object? parameters = null, bool useTransaction = false,
             int? commandTimeout = null, CommandType? commandType = null)
         {
-            return this.GetConnection(useTransaction).ExecuteScalar<T>(query,
+            return this.GetConnection(useTransaction).ExecuteScalar<TEntity>(query,
                 parameters,
-                useTransaction ? this.Transaction : null,
+                this.GetTransaction(useTransaction),
                 commandTimeout,
                 commandType);
         }
 
-        public async Task<T> ExecuteScalarAsync<T>(string query, object? parameters = null, bool useTransaction = false,
+        public async Task<TEntity> ExecuteScalarAsync<TEntity>(string query, object? parameters = null, bool useTransaction = false,
             int? commandTimeout = null, CommandType? commandType = null)
         {
-            return await this.GetConnection(useTransaction).ExecuteScalarAsync<T>(query,
+            return await this.GetConnection(useTransaction).ExecuteScalarAsync<TEntity>(query,
                 parameters,
-                useTransaction ? this.Transaction : null,
+                this.GetTransaction(useTransaction),
                 commandTimeout,
                 commandType);
         }
