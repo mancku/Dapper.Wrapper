@@ -9,116 +9,267 @@
 
     public partial class DapperWrapper
     {
-        public IEnumerable<TEntity> Find<TEntity>(FormattableString? whereConditions = null, FormattableString? orderBy = null,
+        /// <summary>
+        /// Queries the database for a set of records based on specified conditions and parameters, allowing customization of the query's behavior and results.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned records.</typeparam>
+        /// <param name="filter">A FormattableString representing the WHERE clause conditions to filter the query results. The word 'WHERE' should not be in it. If null, no filtering is applied.</param>
+        /// <param name="orderBy">A FormattableString specifying the ORDER BY clause to determine the order of the returned records. The words 'ORDER BY' should not be in it. If null, the order is unspecified.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the query should be executed within a transaction. If true, the query is executed as part of a transaction; otherwise, it is executed independently.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the query to execute. If null, the default command timeout is used.</param>
+        /// <param name="top">An optional long value specifying the maximum number of records to return. If null, all matching records are returned.</param>
+        /// <param name="skip">An optional long value indicating the number of records to skip before starting to return the records. This parameter is typically used for pagination. If null, no records are skipped.</param>
+        /// <returns>An IEnumerable of type TEntity containing the records that match the query criteria.</returns>
+        public IEnumerable<TEntity> Find<TEntity>(FormattableString? filter = null, FormattableString? orderBy = null,
             bool isTransactional = false, TimeSpan? commandTimeout = null, long? top = null, long? skip = null)
         {
-            var options = SetRangedBatchSqlStatementOptions<TEntity>(isTransactional, whereConditions, orderBy,
+            var options = SetRangedBatchSqlStatementOptions<TEntity>(isTransactional, filter, orderBy,
                 commandTimeout, top, skip);
             return this.GetConnection(isTransactional).Find(Transaction, options);
         }
 
-        public List<TEntity> FindAsList<TEntity>(FormattableString? whereConditions = null, FormattableString? orderBy = null,
+        /// <summary>
+        /// Queries the database for a set of records based on specified conditions and parameters, allowing customization of the query's behavior and results.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned records.</typeparam>
+        /// <param name="options">An action that accepts an IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder instance of TEntity, 
+        /// allowing the caller to configure the query options, such as specifying filtering, ordering, and paging parameters.</param>
+        /// <returns>An IEnumerable of type TEntity containing the records that match the query criteria.</returns>
+        public IEnumerable<TEntity> Find<TEntity>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> options)
+        {
+            var standardOptions = options as Action<IStandardSqlStatementOptionsBuilder<TEntity>>;
+            return this.GetConnection(standardOptions).Find(Transaction, options);
+        }
+
+        /// <summary>
+        /// Queries the database for a set of records based on specified conditions and parameters, allowing customization of the query's behavior and results.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned records.</typeparam>
+        /// <param name="filter">A FormattableString representing the WHERE clause conditions to filter the query results. The word 'WHERE' should not be in it. If null, no filtering is applied.</param>
+        /// <param name="orderBy">A FormattableString specifying the ORDER BY clause to determine the order of the returned records. The words 'ORDER BY' should not be in it. If null, the order is unspecified.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the query should be executed within a transaction. If true, the query is executed as part of a transaction; otherwise, it is executed independently.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the query to execute. If null, the default command timeout is used.</param>
+        /// <param name="top">An optional long value specifying the maximum number of records to return. If null, all matching records are returned.</param>
+        /// <param name="skip">An optional long value indicating the number of records to skip before starting to return the records. This parameter is typically used for pagination. If null, no records are skipped.</param>
+        /// <returns>A List of type TEntity containing the records that match the query criteria.</returns>
+        public List<TEntity> FindAsList<TEntity>(FormattableString? filter = null, FormattableString? orderBy = null,
             bool isTransactional = false, TimeSpan? commandTimeout = null, long? top = null, long? skip = null)
         {
-            return this.Find<TEntity>(whereConditions, orderBy, isTransactional, commandTimeout, top, skip)
+            return this.Find<TEntity>(filter, orderBy, isTransactional, commandTimeout, top, skip)
                 .ToList();
         }
 
-        public IEnumerable<TEntity> Find<TEntity>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> options,
-            bool isTransactional = false)
+        /// <summary>
+        /// Queries the database for a set of records based on specified conditions and parameters, allowing customization of the query's behavior and results.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned records.</typeparam>
+        /// <param name="options">An action that accepts an IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder instance of TEntity, 
+        /// allowing the caller to configure the query options, such as specifying filtering, ordering, and paging parameters.</param>
+        /// <returns>A List of type TEntity containing the records that match the query criteria.</returns>
+        public List<TEntity> FindAsList<TEntity>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> options)
         {
-            return this.GetConnection(isTransactional).Find(Transaction, options);
+            return this.Find(options).ToList();
         }
 
-        public List<TEntity> FindAsList<TEntity>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> options,
-            bool isTransactional = false)
-        {
-            return this.Find(options, isTransactional).ToList();
-        }
-
-        public async Task<List<TEntity>> FindAsListAsync<TEntity>(FormattableString? whereConditions = null, FormattableString? orderBy = null,
+        /// <summary>
+        /// Asynchronously queries the database for a set of records based on specified conditions and parameters, allowing customization of the query's behavior and results.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned records.</typeparam>
+        /// <param name="filter">A FormattableString representing the WHERE clause conditions to filter the query results. The word 'WHERE' should not be in it. If null, no filtering is applied.</param>
+        /// <param name="orderBy">A FormattableString specifying the ORDER BY clause to determine the order of the returned records. The words 'ORDER BY' should not be in it. If null, the order is unspecified.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the query should be executed within a transaction. If true, the query is executed as part of a transaction; otherwise, it is executed independently.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the query to execute. If null, the default command timeout is used.</param>
+        /// <param name="top">An optional long value specifying the maximum number of records to return. If null, all matching records are returned.</param>
+        /// <param name="skip">An optional long value indicating the number of records to skip before starting to return the records. This parameter is typically used for pagination. If null, no records are skipped.</param>
+        /// <returns>A Task of IEnumerable of type TEntity containing the records that match the query criteria.</returns>
+        public async Task<IEnumerable<TEntity>> FindAsync<TEntity>(FormattableString? filter = null, FormattableString? orderBy = null,
             bool isTransactional = false, TimeSpan? commandTimeout = null, long? top = null, long? skip = null)
         {
-            var result = await this.FindAsync<TEntity>(whereConditions, orderBy, isTransactional, commandTimeout, top, skip);
-            return result.ToList();
-        }
-
-        public async Task<IEnumerable<TEntity>> FindAsync<TEntity>(FormattableString? whereConditions = null, FormattableString? orderBy = null,
-            bool isTransactional = false, TimeSpan? commandTimeout = null, long? top = null, long? skip = null)
-        {
-            var options = SetRangedBatchSqlStatementOptions<TEntity>(isTransactional, whereConditions,
+            var options = SetRangedBatchSqlStatementOptions<TEntity>(isTransactional, filter,
                 orderBy, commandTimeout, top, skip);
             return await this.GetConnection(isTransactional).FindAsync(Transaction, options);
         }
 
-        public async Task<List<TEntity>> FindAsListAsync<TEntity>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> options)
-        {
-            var result = await this.FindAsync(options);
-            return result.ToList();
-        }
-
+        /// <summary>
+        /// Asynchronously queries the database for a set of records based on specified conditions and parameters, allowing customization of the query's behavior and results.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned records.</typeparam>
+        /// <param name="options">An action that accepts an IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder instance of TEntity, 
+        /// allowing the caller to configure the query options, such as specifying filtering, ordering, and paging parameters.</param>
+        /// <returns>A Task of IEnumerable of type TEntity containing the records that match the query criteria.</returns>
         public async Task<IEnumerable<TEntity>> FindAsync<TEntity>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> options)
         {
             var standardOptions = options as Action<IStandardSqlStatementOptionsBuilder<TEntity>>;
             return await this.GetConnection(standardOptions).FindAsync(Transaction, options);
         }
 
+        /// <summary>
+        /// Asynchronously queries the database for a set of records based on specified conditions and parameters, allowing customization of the query's behavior and results.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned records.</typeparam>
+        /// <param name="filter">A FormattableString representing the WHERE clause conditions to filter the query results. The word 'WHERE' should not be in it. If null, no filtering is applied.</param>
+        /// <param name="orderBy">A FormattableString specifying the ORDER BY clause to determine the order of the returned records. The words 'ORDER BY' should not be in it. If null, the order is unspecified.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the query should be executed within a transaction. If true, the query is executed as part of a transaction; otherwise, it is executed independently.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the query to execute. If null, the default command timeout is used.</param>
+        /// <param name="top">An optional long value specifying the maximum number of records to return. If null, all matching records are returned.</param>
+        /// <param name="skip">An optional long value indicating the number of records to skip before starting to return the records. This parameter is typically used for pagination. If null, no records are skipped.</param>
+        /// <returns>A Task of List of type TEntity containing the records that match the query criteria.</returns>
+        public async Task<List<TEntity>> FindAsListAsync<TEntity>(FormattableString? filter = null, FormattableString? orderBy = null,
+            bool isTransactional = false, TimeSpan? commandTimeout = null, long? top = null, long? skip = null)
+        {
+            var result = await this.FindAsync<TEntity>(filter, orderBy, isTransactional, commandTimeout, top, skip);
+            return result.ToList();
+        }
+
+        /// <summary>
+        /// Asynchronously queries the database for a set of records based on specified conditions and parameters, allowing customization of the query's behavior and results.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned records.</typeparam>
+        /// <param name="options">An action that accepts an IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder instance of TEntity, 
+        /// allowing the caller to configure the query options, such as specifying filtering, ordering, and paging parameters.</param>
+        /// <returns>A Task of List of type TEntity containing the records that match the query criteria.</returns>
+        public async Task<List<TEntity>> FindAsListAsync<TEntity>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> options)
+        {
+            var result = await this.FindAsync(options);
+            return result.ToList();
+        }
+
+        /// <summary>
+        /// Queries the database for a single record based on its Primary Key(s).
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned record.</typeparam>
+        /// <param name="entityKeys">The entity with the needed value(s) set in the property/properties with the Key attribute</param>
+        /// <param name="isTransactional">A boolean value indicating whether the query should be executed within a transaction. If true, the query is executed as part of a transaction; otherwise, it is executed independently.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the query to execute. If null, the default command timeout is used.</param>
+        /// <returns>Returns a single entity or NULL if none could be found.</returns>
         public TEntity? Get<TEntity>(TEntity entityKeys, bool isTransactional = false, TimeSpan? commandTimeout = null)
         {
             var options = SetSelectStatementOptions<TEntity>(isTransactional, commandTimeout);
             return this.Get(entityKeys, options);
         }
 
+        /// <summary>
+        /// Queries the database for a single record based on its Primary Key(s).
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned record.</typeparam>
+        /// <param name="entityKeys">The entity with the needed value(s) set in the property/properties with the Key attribute</param>
+        /// <param name="options">An action that accepts an ISelectSqlStatementOptionsBuilder instance of TEntity, 
+        /// allowing the caller to configure the timeout and whether the query should be executed within a transaction.</param>
+        /// <returns>Returns a single entity or NULL if none could be found.</returns>
         public TEntity? Get<TEntity>(TEntity entityKeys, Action<ISelectSqlStatementOptionsBuilder<TEntity>> options)
         {
             var standardOptions = options as Action<IStandardSqlStatementOptionsBuilder<TEntity>>;
             return this.GetConnection(standardOptions).Get(entityKeys, Transaction, options);
         }
 
+        /// <summary>
+        /// Asynchronously queries the database for a single record based on its Primary Key(s).
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned record.</typeparam>
+        /// <param name="entityKeys">The entity with the needed value(s) set in the property/properties with the Key attribute</param>
+        /// <param name="isTransactional">A boolean value indicating whether the query should be executed within a transaction. If true, the query is executed as part of a transaction; otherwise, it is executed independently.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the query to execute. If null, the default command timeout is used.</param>
+        /// <returns>Returns a Task of a single entity or NULL if none could be found.</returns>
         public async Task<TEntity?> GetAsync<TEntity>(TEntity entityKeys, bool isTransactional = false, TimeSpan? commandTimeout = null)
         {
             var options = SetSelectStatementOptions<TEntity>(isTransactional, commandTimeout);
             return await this.GetAsync(entityKeys, options);
         }
 
+        /// <summary>
+        /// Asynchronously queries the database for a single record based on its Primary Key(s).
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned record.</typeparam>
+        /// <param name="entityKeys">The entity with the needed value(s) set in the property/properties with the Key attribute</param>
+        /// <param name="options">An action that accepts an ISelectSqlStatementOptionsBuilder instance of TEntity, 
+        /// allowing the caller to configure the timeout and whether the query should be executed within a transaction.</param>
+        /// <returns>Returns a Task of a single entity or NULL if none could be found.</returns>
         public async Task<TEntity?> GetAsync<TEntity>(TEntity entityKeys, Action<ISelectSqlStatementOptionsBuilder<TEntity>> options)
         {
             var standardOptions = options as Action<IStandardSqlStatementOptionsBuilder<TEntity>>;
             return await this.GetConnection(standardOptions).GetAsync(entityKeys, Transaction, options);
         }
 
-        public int Count<TEntity>(FormattableString? whereConditions = null,
+        /// <summary>
+        /// Counts all the records in a table or a range of records if a filter is specified.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type for which the count is being calculated. This determines the table or collection that the query targets.</typeparam>
+        /// <param name="filter">A FormattableString representing the WHERE clause conditions to filter the query results. The word 'WHERE' should not be in it. If null, no filtering is applied.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the count operation should be executed within a transaction. If true, the operation is part of a transaction; otherwise, it is executed independently. Defaults to false.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the count operation to complete. If null, the default command timeout is used.</param>
+        /// <returns>An integer representing the count of entities that match the specified conditions.</returns>
+        public int Count<TEntity>(FormattableString? filter = null,
             bool isTransactional = false, TimeSpan? commandTimeout = null)
         {
-            var options = SetConditionalSqlStatementOptions<TEntity>(isTransactional, whereConditions, commandTimeout);
+            var options = SetConditionalSqlStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
             return this.GetConnection(isTransactional).Count(Transaction, options);
         }
 
-        public async Task<int> CountAsync<TEntity>(FormattableString? whereConditions = null,
+        /// <summary>
+        /// Asynchronously counts all the records in a table or a range of records if a filter is specified.
+        /// </summary>
+        /// <typeparam name="TEntity">The entity type for which the count is being calculated. This determines the table or collection that the query targets.</typeparam>
+        /// <param name="filter">A FormattableString representing the WHERE clause conditions to filter the query results. The word 'WHERE' should not be in it. If null, no filtering is applied.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the count operation should be executed within a transaction. If true, the operation is part of a transaction; otherwise, it is executed independently. Defaults to false.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the count operation to complete. If null, the default command timeout is used.</param>
+        /// <returns>A Task of an integer representing the count of entities that match the specified conditions.</returns>
+        public async Task<int> CountAsync<TEntity>(FormattableString? filter = null,
             bool isTransactional = false, TimeSpan? commandTimeout = null)
         {
-            var options = SetConditionalSqlStatementOptions<TEntity>(isTransactional, whereConditions, commandTimeout);
+            var options = SetConditionalSqlStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
             return await this.GetConnection(isTransactional).CountAsync(Transaction, options);
         }
 
+        /// <summary>
+        /// Inserts a new record into the database based on the entity provided.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity to be inserted. This type determines the table or collection where the new record will be added.</typeparam>
+        /// <param name="objectToInsert">The entity object that should be inserted into the database. This object's properties should map to the fields or columns of the corresponding table or collection in the database.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the operation should be executed within a transaction. If true, the operation is executed as part of a transaction, providing atomicity and ensuring data integrity. Defaults to true.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the operation to complete. If null, the default command timeout is used.</param>
+        /// <remarks>This method does not return a value. If the operation is successful, the objectToInsert Entity would have its properties updated based on the database generated fields.</remarks>
         public void Insert<TEntity>(TEntity objectToInsert, bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
             var options = SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
             this.GetConnection(isTransactional).Insert(objectToInsert, Transaction, options);
         }
 
+        /// <summary>
+        /// Asynchronously inserts a new record into the database based on the entity provided.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity to be inserted. This type determines the table or collection where the new record will be added.</typeparam>
+        /// <param name="objectToInsert">The entity object that should be inserted into the database. This object's properties should map to the fields or columns of the corresponding table or collection in the database.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the operation should be executed within a transaction. If true, the operation is executed as part of a transaction, providing atomicity and ensuring data integrity. Defaults to true.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the operation to complete. If null, the default command timeout is used.</param>
+        /// <remarks>This method does not return a value. If the operation is successful, the objectToInsert Entity would have its properties updated based on the database generated fields.</remarks>
         public async Task InsertAsync<TEntity>(TEntity objectToInsert, bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
             var options = SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
             await this.GetConnection(isTransactional).InsertAsync(objectToInsert, Transaction, options);
         }
 
+        /// <summary>
+        /// Updates a record in the database based on the entity provided.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity to be updated. This type determines the table or collection where the new record will be added.</typeparam>
+        /// <param name="objectToUpdate">The entity object that should be updated into the database. This object's properties should map to the fields or columns of the corresponding table or collection in the database.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the operation should be executed within a transaction. If true, the operation is executed as part of a transaction, providing atomicity and ensuring data integrity. Defaults to true.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the operation to complete. If null, the default command timeout is used.</param>
+        /// <returns>A Boolean indicating whether the operation has been successful.</returns>
         public bool Update<TEntity>(TEntity objectToUpdate, bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
             var options = SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
             return this.GetConnection(isTransactional).Update(objectToUpdate, Transaction, options);
         }
 
+        /// <summary>
+        /// Asynchronously updates a record in the database based on the entity provided.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity to be updated. This type determines the table or collection where the new record will be added.</typeparam>
+        /// <param name="objectToUpdate">The entity object that should be updated into the database. This object's properties should map to the fields or columns of the corresponding table or collection in the database.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the operation should be executed within a transaction. If true, the operation is executed as part of a transaction, providing atomicity and ensuring data integrity. Defaults to true.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the operation to complete. If null, the default command timeout is used.</param>
+        /// <returns>A Task of Boolean indicating whether the operation has been successful.</returns>
         public async Task<bool> UpdateAsync<TEntity>(TEntity objectToUpdate, bool isTransactional = true,
             TimeSpan? commandTimeout = null)
         {
@@ -126,26 +277,70 @@
             return await this.GetConnection(isTransactional).UpdateAsync(objectToUpdate, Transaction, options);
         }
 
-        public int BulkUpdate<TEntity>(TEntity objectToUpdate, FormattableString? whereConditions, bool isTransactional = true,
+        /// <summary>
+        /// Updates all the records in the table or a range of records if a filter was set.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity to be updated. This type determines the table or collection where the new record will be added.</typeparam>
+        /// <param name="objectToUpdate">
+        /// The data used to update the records. 
+        /// The primary keys will be ignored.
+        /// For partial updates use an entity mapping override.
+        /// </param>
+        /// <param name="filter">A FormattableString representing the WHERE clause conditions to filter the query results. The word 'WHERE' should not be in it. If null, no filtering is applied.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the operation should be executed within a transaction. If true, the operation is executed as part of a transaction, providing atomicity and ensuring data integrity. Defaults to true.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the operation to complete. If null, the default command timeout is used.</param>
+        /// <returns>The number of records updated.</returns>
+        public int BulkUpdate<TEntity>(TEntity objectToUpdate, FormattableString? filter, bool isTransactional = true,
             TimeSpan? commandTimeout = null)
         {
-            var options = SetConditionalBulkStatementOptions<TEntity>(isTransactional, whereConditions, commandTimeout);
+            var options = SetConditionalBulkStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
             return this.GetConnection(isTransactional).BulkUpdate(objectToUpdate, Transaction, options);
         }
 
-        public async Task<int> BulkUpdateAsync<TEntity>(TEntity objectToUpdate, FormattableString? whereConditions,
+        /// <summary>
+        /// Asynchronously updates all the records in the table or a range of records if a filter was set.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity to be updated. This type determines the table or collection where the new record will be added.</typeparam>
+        /// <param name="objectToUpdate">
+        /// The data used to update the records. 
+        /// The primary keys will be ignored.
+        /// For partial updates use an entity mapping override.
+        /// </param>
+        /// <param name="filter">A FormattableString representing the WHERE clause conditions to filter the query results. The word 'WHERE' should not be in it. If null, no filtering is applied.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the operation should be executed within a transaction. If true, the operation is executed as part of a transaction, providing atomicity and ensuring data integrity. Defaults to true.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the operation to complete. If null, the default command timeout is used.</param>
+        /// <returns>A Task of int with the number of records updated.</returns>
+        public async Task<int> BulkUpdateAsync<TEntity>(TEntity objectToUpdate, FormattableString? filter,
             bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
-            var options = SetConditionalBulkStatementOptions<TEntity>(isTransactional, whereConditions, commandTimeout);
+            var options = SetConditionalBulkStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
             return await this.GetConnection(isTransactional).BulkUpdateAsync(objectToUpdate, Transaction, options);
         }
 
+        /// <summary>
+        /// Deletes an entity by its primary keys.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity to be deleted. This type determines the table or collection where the new record will be added.</typeparam>
+        /// <param name="objectToDelete">The entity you wish to remove.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the operation should be executed within a transaction. If true, the operation is executed as part of a transaction, providing atomicity and ensuring data integrity. Defaults to true.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the operation to complete. If null, the default command timeout is used.</param>
+        /// <returns>A Task of int with the number of records updated.</returns>
+        /// <returns>A Boolean indicating whether the operation has been successful.</returns>
         public bool Delete<TEntity>(TEntity objectToDelete, bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
             var options = SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
             return this.GetConnection(isTransactional).Delete(objectToDelete, Transaction, options);
         }
 
+        /// <summary>
+        /// Asynchronously deletes an entity by its primary keys.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity to be deleted. This type determines the table or collection where the new record will be added.</typeparam>
+        /// <param name="objectToDelete">The entity you wish to remove.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the operation should be executed within a transaction. If true, the operation is executed as part of a transaction, providing atomicity and ensuring data integrity. Defaults to true.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the operation to complete. If null, the default command timeout is used.</param>
+        /// <returns>A Task of int with the number of records updated.</returns>
+        /// <returns>A Task of Boolean indicating whether the operation has been successful.</returns>
         public async Task<bool> DeleteAsync<TEntity>(TEntity objectToDelete, bool isTransactional = true,
             TimeSpan? commandTimeout = null)
         {
@@ -153,30 +348,46 @@
             return await this.GetConnection(isTransactional).DeleteAsync(objectToDelete, Transaction, options);
         }
 
-        public int BulkDelete<TEntity>(FormattableString? whereConditions, bool isTransactional = true,
+        /// <summary>
+        /// Deletes all the records in the table or a range of records if a filter was set.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity to be deleted. This type determines the table or collection where the new record will be added.</typeparam>
+        /// <param name="filter">A FormattableString representing the WHERE clause conditions to filter the query results. The word 'WHERE' should not be in it. If null, no filtering is applied.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the operation should be executed within a transaction. If true, the operation is executed as part of a transaction, providing atomicity and ensuring data integrity. Defaults to true.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the operation to complete. If null, the default command timeout is used.</param>
+        /// <returns>The number of records deleted.</returns>
+        public int BulkDelete<TEntity>(FormattableString? filter, bool isTransactional = true,
             TimeSpan? commandTimeout = null)
         {
-            var options = SetConditionalBulkStatementOptions<TEntity>(isTransactional, whereConditions, commandTimeout);
+            var options = SetConditionalBulkStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
             return this.GetConnection(isTransactional).BulkDelete(Transaction, options);
         }
 
-        public async Task<int> BulkDeleteAsync<TEntity>(FormattableString? whereConditions, bool isTransactional = true,
+        /// <summary>
+        /// Asynchronously deletes all the records in the table or a range of records if a filter was set.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity to be deleted. This type determines the table or collection where the new record will be added.</typeparam>
+        /// <param name="filter">A FormattableString representing the WHERE clause conditions to filter the query results. The word 'WHERE' should not be in it. If null, no filtering is applied.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the operation should be executed within a transaction. If true, the operation is executed as part of a transaction, providing atomicity and ensuring data integrity. Defaults to true.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the operation to complete. If null, the default command timeout is used.</param>
+        /// <returns>A Task of int with the number of records deleted.</returns>
+        public async Task<int> BulkDeleteAsync<TEntity>(FormattableString? filter, bool isTransactional = true,
             TimeSpan? commandTimeout = null)
         {
-            var options = SetConditionalBulkStatementOptions<TEntity>(isTransactional, whereConditions, commandTimeout);
+            var options = SetConditionalBulkStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
             return await this.GetConnection(isTransactional).BulkDeleteAsync(Transaction, options);
         }
 
         private static Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>> SetConditionalBulkStatementOptions<TEntity>(
-          bool useCurrentTransaction = false, FormattableString? whereConditions = null,
+          bool useCurrentTransaction = false, FormattableString? filter = null,
           TimeSpan? commandTimeout = null)
         {
             return query =>
             {
                 query.ShouldUseTransaction(useCurrentTransaction);
-                if (!string.IsNullOrEmpty(whereConditions?.ToString() ?? string.Empty))
+                if (!string.IsNullOrEmpty(filter?.ToString() ?? string.Empty))
                 {
-                    query.Where(whereConditions);
+                    query.Where(filter);
                 }
 
                 query.WithTimeout(commandTimeout);
@@ -204,13 +415,13 @@
         }
 
         private static Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> SetRangedBatchSqlStatementOptions<TEntity>(
-            bool useCurrentTransaction = false, FormattableString? whereConditions = null, FormattableString? orderBy = null,
+            bool useCurrentTransaction = false, FormattableString? filter = null, FormattableString? orderBy = null,
             TimeSpan? commandTimeout = null, long? top = null, long? skip = null)
         {
             return query =>
             {
                 query.ShouldUseTransaction(useCurrentTransaction);
-                query.Where(whereConditions);
+                query.Where(filter);
                 query.OrderBy(orderBy);
                 query.WithTimeout(commandTimeout);
                 query.Top(top);
@@ -219,13 +430,13 @@
         }
 
         private static Action<IConditionalSqlStatementOptionsBuilder<TEntity>> SetConditionalSqlStatementOptions<TEntity>(
-            bool useCurrentTransaction = false, FormattableString? whereConditions = null,
+            bool useCurrentTransaction = false, FormattableString? filter = null,
             TimeSpan? commandTimeout = null)
         {
             return query =>
             {
                 query.ShouldUseTransaction(useCurrentTransaction);
-                query.Where(whereConditions);
+                query.Where(filter);
                 query.WithTimeout(commandTimeout);
             };
         }
