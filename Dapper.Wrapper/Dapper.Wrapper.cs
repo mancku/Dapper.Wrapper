@@ -8,7 +8,7 @@
     using System.Threading.Tasks;
     using Microsoft.Extensions.Configuration;
 
-    public partial class DapperWrapper
+    public partial class DapperWrapper : IDisposable
     {
         /// <summary>
         /// 
