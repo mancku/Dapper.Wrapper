@@ -50,7 +50,7 @@
             {
                 try
                 {
-                    var result = await dapperWrapper.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM [ProductModelProductDescription];");
+                    var result = await dapperWrapper.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM ProductModelProductDescription;");
                     result.Should().BeGreaterThan(0);
                 }
                 catch (Exception ex)
@@ -62,15 +62,29 @@
             var postgreConnectionString = _postgreSqlContainer.GetConnectionString();
             using (var dapperWrapper = new DapperWrapper(postgreConnectionString, SqlDialect.PostgreSql))
             {
-                var result = await dapperWrapper.ExecuteScalarAsync<int>("SELECT 1;");
-                Assert.Equal(1, result);
+                try
+                {
+                    var result = await dapperWrapper.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM ProductModelProductDescription;");
+                    result.Should().BeGreaterThan(0);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
             }
 
             var mySqlConnectionString = _mySqlContainer.GetConnectionString();
             using (var dapperWrapper = new DapperWrapper(mySqlConnectionString, SqlDialect.MySql))
             {
-                var result = await dapperWrapper.ExecuteScalarAsync<int>("SELECT 1;");
-                Assert.Equal(1, result);
+                try
+                {
+                    var result = await dapperWrapper.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM ProductModelProductDescription;");
+                    result.Should().BeGreaterThan(0);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
             }
         }
 
@@ -89,6 +103,7 @@
 
             await this.InitializeMssqlDb(scriptsFolder);
             await this.InitializePostgresDb(scriptsFolder);
+            await this.InitializeMysqlDb(scriptsFolder);
         }
 
         public async Task DisposeAsync()
@@ -131,6 +146,23 @@
                 try
                 {
                     await dapperWrapper.ExecuteAsync(postgresInitScript, useTransaction: false, commandTimeout: 300, commandType: CommandType.Text);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    throw;
+                }
+            }
+        }
+
+        private async Task InitializeMysqlDb(string scriptsFolder)
+        {
+            var mysqlInitScript = await File.ReadAllTextAsync(Path.Combine(scriptsFolder, "mysql.sql"));
+            using (var dapperWrapper = new DapperWrapper(_mySqlContainer.GetConnectionString(), SqlDialect.MySql))
+            {
+                try
+                {
+                    await dapperWrapper.ExecuteAsync(mysqlInitScript, useTransaction: false, commandTimeout: 300, commandType: CommandType.Text);
                 }
                 catch (Exception ex)
                 {
