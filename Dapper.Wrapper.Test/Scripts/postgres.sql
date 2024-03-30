@@ -14,21 +14,21 @@ CREATE TABLE public.Product (
     DiscontinuedDate TIMESTAMP,
     ThumbNailPhoto BYTEA,
     ThumbnailPhotoFileName VARCHAR(50),
-    rowguid UUID NOT NULL DEFAULT gen_random_uuid(),
+    rowguid UUID NULL,
     ModifiedDate TIMESTAMP NOT NULL
 );
 
 CREATE TABLE public.ProductDescription (
     ProductDescriptionID SERIAL PRIMARY KEY,
     Description VARCHAR(400) NOT NULL,
-    rowguid UUID NOT NULL DEFAULT gen_random_uuid(),
+    rowguid UUID NULL,
     ModifiedDate TIMESTAMP NOT NULL
 );
 
 CREATE TABLE public.ProductModel (
     ProductModelID SERIAL PRIMARY KEY,
     Name VARCHAR(255) NOT NULL,
-    rowguid UUID NOT NULL DEFAULT gen_random_uuid(),
+    rowguid UUID NULL,
     ModifiedDate TIMESTAMP NOT NULL
 );
 
@@ -36,7 +36,7 @@ CREATE TABLE public.ProductModelProductDescription (
     ProductModelID INT NOT NULL,
     ProductDescriptionID INT NOT NULL,
     Culture CHAR(6) NOT NULL,
-    rowguid UUID NOT NULL DEFAULT gen_random_uuid(),
+    rowguid UUID NULL,
     ModifiedDate TIMESTAMP NOT NULL,
     PRIMARY KEY (ProductModelID, ProductDescriptionID, Culture)
 );
@@ -57,7 +57,7 @@ CREATE TABLE public.ProductCategory (
     ProductCategoryID SERIAL PRIMARY KEY,
     ParentProductCategoryID INT,
     Name VARCHAR(255) NOT NULL,
-    rowguid UUID NOT NULL DEFAULT gen_random_uuid(),
+    rowguid UUID NULL,
     ModifiedDate TIMESTAMP NOT NULL
 );
 
@@ -104,7 +104,7 @@ CREATE TABLE public.Address (
     StateProvince VARCHAR(255) NOT NULL,
     CountryRegion VARCHAR(255) NOT NULL,
     PostalCode VARCHAR(15) NOT NULL,
-    rowguid UUID NOT NULL DEFAULT gen_random_uuid(),
+    rowguid UUID NULL,
     ModifiedDate TIMESTAMP NOT NULL
 );
 
@@ -122,7 +122,7 @@ CREATE TABLE public.Customer (
     Phone VARCHAR(255),
     PasswordHash VARCHAR(128) NOT NULL,
     PasswordSalt VARCHAR(10) NOT NULL,
-    rowguid UUID NOT NULL DEFAULT gen_random_uuid(),
+    rowguid UUID NULL,
     ModifiedDate TIMESTAMP NOT NULL
 );
 
@@ -130,7 +130,7 @@ CREATE TABLE public.CustomerAddress (
     CustomerID INT NOT NULL,
     AddressID INT NOT NULL,
     AddressType VARCHAR(255) NOT NULL,
-    rowguid UUID NOT NULL DEFAULT gen_random_uuid(),
+    rowguid UUID NULL,
     ModifiedDate TIMESTAMP NOT NULL,
     PRIMARY KEY (CustomerID, AddressID)
 );
@@ -143,7 +143,7 @@ CREATE TABLE public.SalesOrderDetail (
     UnitPrice NUMERIC NOT NULL,
     UnitPriceDiscount NUMERIC NOT NULL,
     LineTotal NUMERIC GENERATED ALWAYS AS (COALESCE((UnitPrice * (1 - UnitPriceDiscount)) * OrderQty, 0.0)) STORED,
-    rowguid UUID NOT NULL DEFAULT gen_random_uuid(),
+    rowguid UUID NULL,
     ModifiedDate TIMESTAMP NOT NULL
 );
 
@@ -154,8 +154,7 @@ CREATE TABLE public.SalesOrderHeader (
     DueDate TIMESTAMP NOT NULL,
     ShipDate TIMESTAMP,
     Status SMALLINT NOT NULL,
-    OnlineOrderFlag VARCHAR(255) NOT NULL, -- Adjusted the type for OnlineOrderFlag
-    SalesOrderNumber TEXT GENERATED ALWAYS AS (COALESCE('SO' || SalesOrderID::TEXT, '*** ERROR ***')) STORED,
+    OnlineOrderFlag VARCHAR(255) NOT NULL,
     PurchaseOrderNumber VARCHAR(255),
     AccountNumber VARCHAR(255),
     CustomerID INT NOT NULL,
@@ -168,7 +167,7 @@ CREATE TABLE public.SalesOrderHeader (
     Freight NUMERIC NOT NULL,
     TotalDue NUMERIC GENERATED ALWAYS AS (COALESCE(SubTotal + TaxAmt + Freight, 0)) STORED,
     Comment TEXT,
-    rowguid UUID NOT NULL DEFAULT gen_random_uuid(),
+    rowguid UUID NULL,
     ModifiedDate TIMESTAMP NOT NULL
 );
 
@@ -4506,31 +4505,21 @@ ALTER TABLE ProductModel ADD  CONSTRAINT AK_ProductModel_rowguid UNIQUE (rowguid
 ALTER TABLE ProductModelProductDescription ADD  CONSTRAINT AK_ProductModelProductDescription_rowguid UNIQUE (rowguid);
 ALTER TABLE SalesOrderDetail ADD  CONSTRAINT AK_SalesOrderDetail_rowguid UNIQUE (rowguid);
 ALTER TABLE SalesOrderHeader ADD  CONSTRAINT AK_SalesOrderHeader_rowguid UNIQUE (rowguid);
-ALTER TABLE SalesOrderHeader ADD  CONSTRAINT AK_SalesOrderHeader_SalesOrderNumber UNIQUE (SalesOrderNumber);
 
 -- ADD DEFAULTS
 ALTER TABLE BuildVersion ALTER COLUMN ModifiedDate SET DEFAULT now();
 ALTER TABLE Customer ADD  CONSTRAINT DF_Customer_rowguid UNIQUE (rowguid);
 ALTER TABLE ErrorLog ALTER COLUMN ErrorTime SET DEFAULT now();
-ALTER TABLE Address ALTER COLUMN rowguid SET DEFAULT gen_random_uuid();
 ALTER TABLE Address ALTER COLUMN ModifiedDate SET DEFAULT now();
 ALTER TABLE Customer ALTER COLUMN NameStyle SET DEFAULT 0;
-ALTER TABLE Customer ALTER COLUMN rowguid SET DEFAULT gen_random_uuid();
 ALTER TABLE Customer ALTER COLUMN ModifiedDate SET DEFAULT now();
-ALTER TABLE CustomerAddress ALTER COLUMN rowguid SET DEFAULT gen_random_uuid();
 ALTER TABLE CustomerAddress ALTER COLUMN ModifiedDate SET DEFAULT now();
-ALTER TABLE Product ALTER COLUMN rowguid SET DEFAULT gen_random_uuid();
 ALTER TABLE Product ALTER COLUMN ModifiedDate SET DEFAULT now();
-ALTER TABLE ProductCategory ALTER COLUMN rowguid SET DEFAULT gen_random_uuid();
 ALTER TABLE ProductCategory ALTER COLUMN ModifiedDate SET DEFAULT now();
-ALTER TABLE ProductDescription ALTER COLUMN rowguid SET DEFAULT gen_random_uuid();
 ALTER TABLE ProductDescription ALTER COLUMN ModifiedDate SET DEFAULT now();
-ALTER TABLE ProductModel ALTER COLUMN rowguid SET DEFAULT gen_random_uuid();
 ALTER TABLE ProductModel ALTER COLUMN ModifiedDate SET DEFAULT now();
-ALTER TABLE ProductModelProductDescription ALTER COLUMN rowguid SET DEFAULT gen_random_uuid();
 ALTER TABLE ProductModelProductDescription ALTER COLUMN ModifiedDate SET DEFAULT now();
 ALTER TABLE SalesOrderDetail ALTER COLUMN UnitPriceDiscount SET DEFAULT 0.0;
-ALTER TABLE SalesOrderDetail ALTER COLUMN rowguid SET DEFAULT gen_random_uuid();
 ALTER TABLE SalesOrderDetail ALTER COLUMN ModifiedDate SET DEFAULT now();
 ALTER TABLE SalesOrderHeader ALTER COLUMN RevisionNumber SET DEFAULT 0;
 ALTER TABLE SalesOrderHeader ALTER COLUMN OrderDate SET DEFAULT now();
@@ -4539,7 +4528,6 @@ ALTER TABLE SalesOrderHeader ALTER COLUMN OnlineOrderFlag SET DEFAULT 1;
 ALTER TABLE SalesOrderHeader ALTER COLUMN SubTotal SET DEFAULT 0.00;
 ALTER TABLE SalesOrderHeader ALTER COLUMN TaxAmt SET DEFAULT 0.00;
 ALTER TABLE SalesOrderHeader ALTER COLUMN Freight SET DEFAULT 0.00;
-ALTER TABLE SalesOrderHeader ALTER COLUMN rowguid SET DEFAULT gen_random_uuid();
 ALTER TABLE SalesOrderHeader ALTER COLUMN ModifiedDate SET DEFAULT now();
 
 -- ADD FKs
@@ -4547,8 +4535,8 @@ ALTER TABLE CustomerAddress ADD CONSTRAINT FK_CustomerAddress_Address_AddressID 
 ALTER TABLE CustomerAddress ADD CONSTRAINT FK_CustomerAddress_Customer_CustomerID FOREIGN KEY(CustomerID) REFERENCES Customer (CustomerID);
 ALTER TABLE Product ADD CONSTRAINT FK_Product_ProductCategory_ProductCategoryID FOREIGN KEY(ProductCategoryID) REFERENCES ProductCategory (ProductCategoryID);
 ALTER TABLE Product ADD CONSTRAINT FK_Product_ProductModel_ProductModelID FOREIGN KEY(ProductModelID) REFERENCES ProductModel (ProductModelID);
-ALTER TABLE ProductCategory ADD CONSTRAINT FK_ProductCategory_ProductCategory_ParentProductCategoryID_ProductCategoryID FOREIGN KEY(ParentProductCategoryID) REFERENCES ProductCategory (ProductCategoryID);
-ALTER TABLE ProductModelProductDescription ADD CONSTRAINT FK_ProductModelProductDescription_ProductDescription_ProductDescriptionID FOREIGN KEY(ProductDescriptionID) REFERENCES ProductDescription (ProductDescriptionID);
+ALTER TABLE ProductCategory ADD CONSTRAINT FK_PCat_PCat_ParentPCatId_PCatId FOREIGN KEY(ParentProductCategoryID) REFERENCES ProductCategory (ProductCategoryID);
+ALTER TABLE ProductModelProductDescription ADD CONSTRAINT FK_PModelPCat_PDescr_PDescrId FOREIGN KEY(ProductDescriptionID) REFERENCES ProductDescription (ProductDescriptionID);
 ALTER TABLE ProductModelProductDescription ADD CONSTRAINT FK_ProductModelProductDescription_ProductModel_ProductModelID FOREIGN KEY(ProductModelID) REFERENCES ProductModel (ProductModelID);
 ALTER TABLE SalesOrderDetail ADD CONSTRAINT FK_SalesOrderDetail_Product_ProductID FOREIGN KEY(ProductID) REFERENCES Product (ProductID);
 ALTER TABLE SalesOrderDetail ADD CONSTRAINT FK_SalesOrderDetail_SalesOrderHeader_SalesOrderID FOREIGN KEY(SalesOrderID) REFERENCES SalesOrderHeader (SalesOrderID) ON DELETE CASCADE;
