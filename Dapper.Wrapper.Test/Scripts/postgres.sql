@@ -1,3 +1,18 @@
+DROP VIEW IF EXISTS public.vGetAllCategories;
+DROP VIEW IF EXISTS public.vProductAndDescription;
+DROP TABLE IF EXISTS public.BuildVersion;
+DROP TABLE IF EXISTS public.ErrorLog;
+DROP TABLE IF EXISTS public.CustomerAddress;
+DROP TABLE IF EXISTS public.SalesOrderDetail;
+DROP TABLE IF EXISTS public.ProductModelProductDescription;
+DROP TABLE IF EXISTS public.ProductDescription;
+DROP TABLE IF EXISTS public.Product;
+DROP TABLE IF EXISTS public.ProductModel;
+DROP TABLE IF EXISTS public.ProductCategory;
+DROP TABLE IF EXISTS public.SalesOrderHeader;
+DROP TABLE IF EXISTS public.Address;
+DROP TABLE IF EXISTS public.Customer;
+
 CREATE TABLE public.Product (
     ProductID SERIAL PRIMARY KEY,
     Name VARCHAR(255) NOT NULL,
