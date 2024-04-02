@@ -3,27 +3,31 @@
     using FastCrud;
     using FluentAssertions;
     using Microsoft.Extensions.Configuration;
+    using System.Configuration;
     using System.Data;
     using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
     using Testcontainers.MsSql;
     using Testcontainers.MySql;
     using Testcontainers.PostgreSql;
 
-    public sealed class ContainersHandler : IAsyncLifetime
+    public sealed class TestContainersHandlerFixture : IAsyncLifetime
     {
         private const string _dataBaseName = "DapperWrapperTests";
-        private readonly MsSqlContainer _msSqlContainer;
-        private readonly PostgreSqlContainer _postgreSqlContainer;
-        private readonly MySqlContainer _mySqlContainer;
         private const string _password = "AVeryS3curePassw0rd!";
         private const int _mssqlPort = 1499;
         private readonly IConfiguration _configuration;
 
+        private readonly MsSqlContainer _msSqlContainer;
+        private readonly MySqlContainer _mySqlContainer;
+        private readonly PostgreSqlContainer _postgreSqlContainer;
 
-        public ContainersHandler()
+        public string MsSqlConnectionString { get; private set; }
+        public string PostgreSqlConnectionString { get; private set; }
+        public string MySqlConnectionString { get; private set; }
+
+        public TestContainersHandlerFixture()
         {
-            _configuration = this.InitializeConfiguration();
+            _configuration = InitializeConfiguration();
             var reUseTestContainers = _configuration.GetValue<bool>("ReUseTestContainers");
 
             _msSqlContainer = new MsSqlBuilder()
@@ -51,71 +55,25 @@
                 .WithLabel("resource-id", "DapperWrapperTestMySql")
                 .WithReuse(reUseTestContainers)
                 .Build();
-
-        }
-
-        [Fact]
-        public async Task ReadFromMsSqlDatabase()
-        {
-            var mssqlConnectionString = $"Server={_msSqlContainer.Hostname},{_mssqlPort};Database={_dataBaseName};User Id=sa;Password={_password};TrustServerCertificate=True";
-            using (var dapperWrapper = new DapperWrapper(mssqlConnectionString, SqlDialect.MsSql))
-            {
-                try
-                {
-                    var result = await dapperWrapper.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM ProductModelProductDescription;");
-                    result.Should().BeGreaterThan(0);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
-            }
-
-            var postgreConnectionString = _postgreSqlContainer.GetConnectionString();
-            using (var dapperWrapper = new DapperWrapper(postgreConnectionString, SqlDialect.PostgreSql))
-            {
-                try
-                {
-                    var result = await dapperWrapper.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM ProductModelProductDescription;");
-                    result.Should().BeGreaterThan(0);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
-            }
-
-            var mySqlConnectionString = _mySqlContainer.GetConnectionString();
-            using (var dapperWrapper = new DapperWrapper(mySqlConnectionString, SqlDialect.MySql))
-            {
-                try
-                {
-                    var result = await dapperWrapper.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM ProductModelProductDescription;");
-                    result.Should().BeGreaterThan(0);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
-            }
         }
 
         public async Task InitializeAsync()
         {
-            await _msSqlContainer.StartAsync();
-            await _postgreSqlContainer.StartAsync();
-            await _mySqlContainer.StartAsync();
+            await this.StartContainers();
 
             var projectPath = Directory.GetParent(Environment.CurrentDirectory)?.Parent?.Parent?.FullName;
             if (string.IsNullOrEmpty(projectPath) || !Directory.Exists(projectPath))
             {
                 throw new Exception($"Couldn't find path of the project in ${projectPath}");
             }
+
             var scriptsFolder = Path.Combine(projectPath, "Scripts");
 
-            await this.InitializeMssqlDb(scriptsFolder);
-            await this.InitializePostgresDb(scriptsFolder);
-            await this.InitializeMysqlDb(scriptsFolder);
+            await this.InitializeDatabases(scriptsFolder);
+
+            this.AssignConnectionStrings();
+
+            await this.CheckDatabases();
         }
 
         public async Task DisposeAsync()
@@ -123,6 +81,31 @@
             await _msSqlContainer.DisposeAsync().AsTask();
             await _postgreSqlContainer.DisposeAsync().AsTask();
             await _mySqlContainer.DisposeAsync().AsTask();
+        }
+
+        private static IConfiguration InitializeConfiguration()
+        {
+            var configBuilder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                //.AddJsonFile("appsettings.json", optional: false)
+                //.AddJsonFile("appsettings.Development.json", false)
+                .AddJsonFile("appsettings.Test.json", false);
+
+            return configBuilder.Build();
+        }
+
+        private async Task StartContainers()
+        {
+            await _msSqlContainer.StartAsync();
+            await _postgreSqlContainer.StartAsync();
+            await _mySqlContainer.StartAsync();
+        }
+
+        private async Task InitializeDatabases(string scriptsFolder)
+        {
+            await this.InitializeMssqlDb(scriptsFolder);
+            await this.InitializePostgresDb(scriptsFolder);
+            await this.InitializeMysqlDb(scriptsFolder);
         }
 
         private async Task InitializeMssqlDb(string scriptsFolder)
@@ -139,11 +122,13 @@
         private async Task InitializePostgresDb(string scriptsFolder)
         {
             var postgresInitScript = await File.ReadAllTextAsync(Path.Combine(scriptsFolder, "postgres.sql"));
-            using (var dapperWrapper = new DapperWrapper(_postgreSqlContainer.GetConnectionString(), SqlDialect.PostgreSql))
+            using (var dapperWrapper =
+                   new DapperWrapper(_postgreSqlContainer.GetConnectionString(), SqlDialect.PostgreSql))
             {
                 try
                 {
-                    await dapperWrapper.ExecuteAsync(postgresInitScript, useTransaction: false, commandTimeout: 300, commandType: CommandType.Text);
+                    await dapperWrapper.ExecuteAsync(postgresInitScript, useTransaction: false, commandTimeout: 300,
+                        commandType: CommandType.Text);
                 }
                 catch (Exception ex)
                 {
@@ -160,7 +145,8 @@
             {
                 try
                 {
-                    await dapperWrapper.ExecuteAsync(mysqlInitScript, useTransaction: false, commandTimeout: 300, commandType: CommandType.Text);
+                    await dapperWrapper.ExecuteAsync(mysqlInitScript, useTransaction: false, commandTimeout: 300,
+                        commandType: CommandType.Text);
                 }
                 catch (Exception ex)
                 {
@@ -191,7 +177,8 @@
                 try
                 {
                     Console.WriteLine(batch);
-                    await dapperWrapper.ExecuteAsync(batch, useTransaction: false, commandTimeout: 300, commandType: CommandType.Text);
+                    await dapperWrapper.ExecuteAsync(batch, useTransaction: false, commandTimeout: 300,
+                        commandType: CommandType.Text);
                 }
                 catch (Exception ex)
                 {
@@ -213,19 +200,40 @@
                 var crateBatches = SplitMssqlScriptInBatches(createScript);
                 batches.AddRange(crateBatches);
             }
+
             batches.AddRange(seedBatches);
             return batches;
         }
 
-        private IConfiguration InitializeConfiguration()
+        private void AssignConnectionStrings()
         {
-            var configBuilder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                //.AddJsonFile("appsettings.json", optional: false)
-                //.AddJsonFile("appsettings.Development.json", false)
-                .AddJsonFile("appsettings.Test.json", false);
+            this.MsSqlConnectionString =
+                $"Server={_msSqlContainer.Hostname},{_mssqlPort};Database={_dataBaseName};User Id=sa;Password={_password};TrustServerCertificate=True";
+            this.PostgreSqlConnectionString = _postgreSqlContainer.GetConnectionString();
+            this.MySqlConnectionString = _mySqlContainer.GetConnectionString();
+        }
 
-            return configBuilder.Build();
+        private async Task CheckDatabases()
+        {
+            await CheckDatabaseData(this.MsSqlConnectionString, SqlDialect.MsSql);
+            await CheckDatabaseData(this.PostgreSqlConnectionString, SqlDialect.PostgreSql);
+            await CheckDatabaseData(this.MySqlConnectionString, SqlDialect.MySql);
+        }
+
+        private static async Task CheckDatabaseData(string connectionString, SqlDialect sqlDialect)
+        {
+            const string query = "SELECT COUNT(1) FROM Product;";
+
+            try
+            {
+                using var dapperWrapper = new DapperWrapper(connectionString, sqlDialect);
+                var result = await dapperWrapper.ExecuteScalarAsync<int>(query);
+                result.Should().BeGreaterThan(0);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error on checking data with dialect '{sqlDialect}'", ex);
+            }
         }
     }
 }
