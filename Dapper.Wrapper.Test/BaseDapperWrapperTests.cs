@@ -1,18 +1,19 @@
 ﻿namespace Dapper.Wrapper.Test
 {
     using Bogus;
+    using FastCrud;
     using System;
 
     [Collection("DapperWrapperTestsCollection")]
     public abstract class BaseDapperWrapperTests : IDisposable
     {
-        protected DapperWrapper _msSqlDapperWrapper;
-        protected DapperWrapper _postgreSqlDapperWrapper;
-        protected DapperWrapper _mySqlDapperWrapper;
+        protected readonly Faker Faker = new();
+        
+        private readonly DapperWrapper _msSqlDapperWrapper;
+        private readonly DapperWrapper _postgreSqlDapperWrapper;
+        private readonly DapperWrapper _mySqlDapperWrapper;
 
         private readonly TestContainersHandlerFixture _fixture;
-        protected readonly Faker Faker = new();
-
 
         protected BaseDapperWrapperTests(TestContainersHandlerFixture fixture)
         {
@@ -27,6 +28,17 @@
             _msSqlDapperWrapper.Dispose();
             _postgreSqlDapperWrapper.Dispose();
             _mySqlDapperWrapper.Dispose();
+        }
+
+        protected DapperWrapper GetDapperWrapper(SqlDialect sqlDialect)
+        {
+            return sqlDialect switch
+            {
+                SqlDialect.MsSql => _msSqlDapperWrapper,
+                SqlDialect.MySql => _mySqlDapperWrapper,
+                SqlDialect.PostgreSql => _postgreSqlDapperWrapper,
+                _ => throw new ArgumentOutOfRangeException(nameof(sqlDialect), sqlDialect, null)
+            };
         }
     }
 }
