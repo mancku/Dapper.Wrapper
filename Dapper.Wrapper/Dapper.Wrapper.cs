@@ -15,6 +15,8 @@
     /// </summary>
     public partial class DapperWrapper : IDisposable
     {
+        private readonly SqlDialect _sqlDialect;
+
         /// <summary>
         /// Initializes a new instance of the DapperWrapper class, setting up the necessary configuration for database operations.
         /// </summary>
@@ -36,6 +38,7 @@
         public DapperWrapper(string connectionString, SqlDialect sqlDialect)
         {
             OrmConfiguration.DefaultDialect = sqlDialect;
+            _sqlDialect = sqlDialect;
 
             this.OpenConnection(connectionString, true);
             this.OpenConnection(connectionString, false);
