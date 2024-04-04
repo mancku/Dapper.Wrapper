@@ -23,7 +23,7 @@
         public IEnumerable<TEntity> Find<TEntity>(FormattableString? filter = null, FormattableString? orderBy = null,
             bool isTransactional = false, TimeSpan? commandTimeout = null, long? top = null, long? skip = null)
         {
-            var options = SetRangedBatchSqlStatementOptions<TEntity>(isTransactional, filter, orderBy,
+            var options = this.SetRangedBatchSqlStatementOptions<TEntity>(isTransactional, filter, orderBy,
                 commandTimeout, top, skip);
             return this.GetConnection(isTransactional).Find(Transaction, options);
         }
@@ -85,7 +85,7 @@
         public async Task<IEnumerable<TEntity>> FindAsync<TEntity>(FormattableString? filter = null, FormattableString? orderBy = null,
             bool isTransactional = false, TimeSpan? commandTimeout = null, long? top = null, long? skip = null)
         {
-            var options = SetRangedBatchSqlStatementOptions<TEntity>(isTransactional, filter,
+            var options = this.SetRangedBatchSqlStatementOptions<TEntity>(isTransactional, filter,
                 orderBy, commandTimeout, top, skip);
             return await this.GetConnection(isTransactional).FindAsync(Transaction, options);
         }
@@ -144,7 +144,7 @@
         /// <returns>Returns a single entity or NULL if none could be found.</returns>
         public TEntity? Get<TEntity>(TEntity entityKeys, bool isTransactional = false, TimeSpan? commandTimeout = null)
         {
-            var options = SetSelectStatementOptions<TEntity>(isTransactional, commandTimeout);
+            var options = this.SetSelectStatementOptions<TEntity>(isTransactional, commandTimeout);
             return this.Get(entityKeys, options);
         }
 
@@ -172,7 +172,7 @@
         /// <returns>Returns a Task of a single entity or NULL if none could be found.</returns>
         public async Task<TEntity?> GetAsync<TEntity>(TEntity entityKeys, bool isTransactional = false, TimeSpan? commandTimeout = null)
         {
-            var options = SetSelectStatementOptions<TEntity>(isTransactional, commandTimeout);
+            var options = this.SetSelectStatementOptions<TEntity>(isTransactional, commandTimeout);
             return await this.GetAsync(entityKeys, options);
         }
 
@@ -201,7 +201,7 @@
         public int Count<TEntity>(FormattableString? filter = null,
             bool isTransactional = false, TimeSpan? commandTimeout = null)
         {
-            var options = SetConditionalSqlStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
+            var options = this.SetConditionalSqlStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
             return this.GetConnection(isTransactional).Count(Transaction, options);
         }
 
@@ -216,7 +216,7 @@
         public async Task<int> CountAsync<TEntity>(FormattableString? filter = null,
             bool isTransactional = false, TimeSpan? commandTimeout = null)
         {
-            var options = SetConditionalSqlStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
+            var options = this.SetConditionalSqlStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
             return await this.GetConnection(isTransactional).CountAsync(Transaction, options);
         }
 
@@ -230,7 +230,7 @@
         /// <remarks>This method does not return a value. If the operation is successful, the objectToInsert Entity would have its properties updated based on the database generated fields.</remarks>
         public void Insert<TEntity>(TEntity objectToInsert, bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
-            var options = SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
+            var options = this.SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
             this.GetConnection(isTransactional).Insert(objectToInsert, Transaction, options);
         }
 
@@ -244,7 +244,7 @@
         /// <remarks>This method does not return a value. If the operation is successful, the objectToInsert Entity would have its properties updated based on the database generated fields.</remarks>
         public async Task InsertAsync<TEntity>(TEntity objectToInsert, bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
-            var options = SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
+            var options = this.SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
             await this.GetConnection(isTransactional).InsertAsync(objectToInsert, Transaction, options);
         }
 
@@ -258,7 +258,7 @@
         /// <returns>A Boolean indicating whether the operation has been successful.</returns>
         public bool Update<TEntity>(TEntity objectToUpdate, bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
-            var options = SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
+            var options = this.SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
             return this.GetConnection(isTransactional).Update(objectToUpdate, Transaction, options);
         }
 
@@ -273,7 +273,7 @@
         public async Task<bool> UpdateAsync<TEntity>(TEntity objectToUpdate, bool isTransactional = true,
             TimeSpan? commandTimeout = null)
         {
-            var options = SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
+            var options = this.SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
             return await this.GetConnection(isTransactional).UpdateAsync(objectToUpdate, Transaction, options);
         }
 
@@ -293,7 +293,7 @@
         public int BulkUpdate<TEntity>(TEntity objectToUpdate, FormattableString? filter, bool isTransactional = true,
             TimeSpan? commandTimeout = null)
         {
-            var options = SetConditionalBulkStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
+            var options = this.SetConditionalBulkStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
             return this.GetConnection(isTransactional).BulkUpdate(objectToUpdate, Transaction, options);
         }
 
@@ -313,7 +313,7 @@
         public async Task<int> BulkUpdateAsync<TEntity>(TEntity objectToUpdate, FormattableString? filter,
             bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
-            var options = SetConditionalBulkStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
+            var options = this.SetConditionalBulkStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
             return await this.GetConnection(isTransactional).BulkUpdateAsync(objectToUpdate, Transaction, options);
         }
 
@@ -328,7 +328,7 @@
         /// <returns>A Boolean indicating whether the operation has been successful.</returns>
         public bool Delete<TEntity>(TEntity objectToDelete, bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
-            var options = SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
+            var options = this.SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
             return this.GetConnection(isTransactional).Delete(objectToDelete, Transaction, options);
         }
 
@@ -344,7 +344,7 @@
         public async Task<bool> DeleteAsync<TEntity>(TEntity objectToDelete, bool isTransactional = true,
             TimeSpan? commandTimeout = null)
         {
-            var options = SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
+            var options = this.SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
             return await this.GetConnection(isTransactional).DeleteAsync(objectToDelete, Transaction, options);
         }
 
@@ -359,7 +359,7 @@
         public int BulkDelete<TEntity>(FormattableString? filter, bool isTransactional = true,
             TimeSpan? commandTimeout = null)
         {
-            var options = SetConditionalBulkStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
+            var options = this.SetConditionalBulkStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
             return this.GetConnection(isTransactional).BulkDelete(Transaction, options);
         }
 
@@ -374,11 +374,11 @@
         public async Task<int> BulkDeleteAsync<TEntity>(FormattableString? filter, bool isTransactional = true,
             TimeSpan? commandTimeout = null)
         {
-            var options = SetConditionalBulkStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
+            var options = this.SetConditionalBulkStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
             return await this.GetConnection(isTransactional).BulkDeleteAsync(Transaction, options);
         }
 
-        private static Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>> SetConditionalBulkStatementOptions<TEntity>(
+        private Action<IConditionalBulkSqlStatementOptionsBuilder<TEntity>> SetConditionalBulkStatementOptions<TEntity>(
           bool useCurrentTransaction = false, FormattableString? filter = null,
           TimeSpan? commandTimeout = null)
         {
@@ -391,33 +391,37 @@
                 }
 
                 query.WithTimeout(commandTimeout);
+                this.SetDialectOverride(query);
             };
         }
 
-        private static Action<IStandardSqlStatementOptionsBuilder<TEntity>> SetStandardStatementOptions<TEntity>(
+        private Action<IStandardSqlStatementOptionsBuilder<TEntity>> SetStandardStatementOptions<TEntity>(
+            bool useCurrentTransaction = false, TimeSpan? commandTimeout = null)
+        {
+            return query =>
+             {
+                 query.ShouldUseTransaction(useCurrentTransaction);
+                 query.WithTimeout(commandTimeout);
+                 this.SetDialectOverride(query);
+             };
+        }
+
+        private Action<ISelectSqlStatementOptionsBuilder<TEntity>> SetSelectStatementOptions<TEntity>(
             bool useCurrentTransaction = false, TimeSpan? commandTimeout = null)
         {
             return query =>
             {
                 query.ShouldUseTransaction(useCurrentTransaction);
                 query.WithTimeout(commandTimeout);
+                this.SetDialectOverride(query);
             };
         }
 
-        private static Action<ISelectSqlStatementOptionsBuilder<TEntity>> SetSelectStatementOptions<TEntity>(
-            bool useCurrentTransaction = false, TimeSpan? commandTimeout = null)
-        {
-            return query =>
-            {
-                query.ShouldUseTransaction(useCurrentTransaction);
-                query.WithTimeout(commandTimeout);
-            };
-        }
-
-        private static Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> SetRangedBatchSqlStatementOptions<TEntity>(
+        private Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> SetRangedBatchSqlStatementOptions<TEntity>(
             bool useCurrentTransaction = false, FormattableString? filter = null, FormattableString? orderBy = null,
             TimeSpan? commandTimeout = null, long? top = null, long? skip = null)
         {
+
             return query =>
             {
                 query.ShouldUseTransaction(useCurrentTransaction);
@@ -426,10 +430,11 @@
                 query.WithTimeout(commandTimeout);
                 query.Top(top);
                 query.Skip(skip);
+                this.SetDialectOverride(query);
             };
         }
 
-        private static Action<IConditionalSqlStatementOptionsBuilder<TEntity>> SetConditionalSqlStatementOptions<TEntity>(
+        private Action<IConditionalSqlStatementOptionsBuilder<TEntity>> SetConditionalSqlStatementOptions<TEntity>(
             bool useCurrentTransaction = false, FormattableString? filter = null,
             TimeSpan? commandTimeout = null)
         {
@@ -438,7 +443,52 @@
                 query.ShouldUseTransaction(useCurrentTransaction);
                 query.Where(filter);
                 query.WithTimeout(commandTimeout);
+                this.SetDialectOverride(query);
             };
+        }
+
+        private void SetDialectOverride<TEntity>(IConditionalBulkSqlStatementOptionsBuilder<TEntity> query)
+        {
+            var dialectOverride = this.GetDialectOverride<TEntity>();
+            query.WithEntityMappingOverride(dialectOverride);
+        }
+
+        private void SetDialectOverride<TEntity>(IStandardSqlStatementOptionsBuilder<TEntity> query)
+        {
+            var dialectOverride = this.GetDialectOverride<TEntity>();
+            query.WithEntityMappingOverride(dialectOverride);
+        }
+
+        private void SetDialectOverride<TEntity>(ISelectSqlStatementOptionsBuilder<TEntity> query)
+        {
+            var dialectOverride = this.GetDialectOverride<TEntity>();
+            query.WithEntityMappingOverride(dialectOverride);
+        }
+
+        private void SetDialectOverride<TEntity>(IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity> query)
+        {
+            var dialectOverride = this.GetDialectOverride<TEntity>();
+            query.WithEntityMappingOverride(dialectOverride);
+        }
+
+        private void SetDialectOverride<TEntity>(IConditionalSqlStatementOptionsBuilder<TEntity> query)
+        {
+            var dialectOverride = this.GetDialectOverride<TEntity>();
+            query.WithEntityMappingOverride(dialectOverride);
+        }
+
+        /// <summary>
+        /// Enforcing the dialect specific for this instance of DapperWrapper
+        /// Because the Dapper.FastCrud is not well prepared for multi-db
+        /// https://github.com/MoonStorm/FastCrud/discussions/160
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <returns></returns>
+        private FastCrud.Mappings.EntityMapping<TEntity> GetDialectOverride<TEntity>()
+        {
+            var dialectOverride = OrmConfiguration.GetDefaultEntityMapping<TEntity>()
+                .Clone().SetDialect(_sqlDialect);
+            return dialectOverride;
         }
     }
 }
