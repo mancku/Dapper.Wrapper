@@ -46,6 +46,8 @@
 
         public DateTime ModifiedDate { get; set; }
 
+        public List<SalesOrderDetail> SalesOrderDetails { get; set; } = [];
+
         internal static Product FromRandomValues(Faker faker)
         {
             var sizes = new List<string>
@@ -84,19 +86,19 @@
 
         internal string GenerateInsertStatementWithoutParameters(SqlDialect sqlDialect)
         {
-            var insertIntoDboProduct = "INSERT INTO [Product] " +
+            var insertIntoProduct = "INSERT INTO [Product] " +
                                        "([Name], [ProductNumber], [Color], [StandardCost], [ListPrice], [Size], [Weight], [ProductCategoryID], [ProductModelID], [SellStartDate], [SellEndDate], [DiscontinuedDate], [ThumbnailPhotoFileName], [rowguid], [ModifiedDate]) " +
                                        "VALUES ('{0}', '{1}', '{2}', {3}, {4}, '{5}', {6}, {7}, {8}, '{9}', '{10}', '{11}', '{12}', '{13}', '{14}')";
 
-            insertIntoDboProduct = sqlDialect switch
+            insertIntoProduct = sqlDialect switch
             {
-                SqlDialect.PostgreSql => insertIntoDboProduct.Replace('[', '"').Replace(']', '"'),
-                SqlDialect.MySql => insertIntoDboProduct.Replace('[', '`').Replace(']', '`'),
-                _ => insertIntoDboProduct
+                SqlDialect.PostgreSql => insertIntoProduct.Replace('[', '"').Replace(']', '"'),
+                SqlDialect.MySql => insertIntoProduct.Replace('[', '`').Replace(']', '`'),
+                _ => insertIntoProduct
             };
 
             return string.Format(
-                insertIntoDboProduct,
+                insertIntoProduct,
                 this.Name.Replace("'", "''"),
                 this.ProductNumber.Replace("'", "''"),
                 this.Color.Replace("'", "''"),
@@ -113,6 +115,20 @@
                 this.rowguid.HasValue ? $"{this.rowguid.Value}" : "NULL",
                 this.ModifiedDate.ToString("yyyy-MM-dd HH:mm:ss")
             );
+        }
+
+        internal string GenerateDeleteStatementWithoutParameters(SqlDialect sqlDialect)
+        {
+            var deleteStatement = $"DELETE FROM [Product] WHERE [ProductID] = {this.ProductID}";
+
+            deleteStatement = sqlDialect switch
+            {
+                SqlDialect.PostgreSql => deleteStatement.Replace('[', '"').Replace(']', '"'),
+                SqlDialect.MySql => deleteStatement.Replace('[', '`').Replace(']', '`'),
+                _ => deleteStatement
+            };
+
+            return deleteStatement;
         }
     }
 }
