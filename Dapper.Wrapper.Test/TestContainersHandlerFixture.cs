@@ -3,6 +3,7 @@
     using FastCrud;
     using FluentAssertions;
     using Microsoft.Extensions.Configuration;
+    using Models;
     using System.Configuration;
     using System.Data;
     using System.Text.RegularExpressions;
@@ -222,12 +223,10 @@
 
         private static async Task CheckDatabaseData(string connectionString, SqlDialect sqlDialect)
         {
-            const string query = "SELECT COUNT(1) FROM Product;";
-
             try
             {
                 using var dapperWrapper = new DapperWrapper(connectionString, sqlDialect);
-                var result = await dapperWrapper.ExecuteScalarAsync<int>(query);
+                var result = await dapperWrapper.CountAsync<Product>();
                 result.Should().BeGreaterThan(0);
             }
             catch (Exception ex)
