@@ -18,7 +18,7 @@
 
         public string ProductNumber { get; set; }
 
-        public string Color { get; set; }
+        public string? Color { get; set; }
 
         public decimal StandardCost { get; set; }
 
@@ -88,7 +88,7 @@
         {
             var insertIntoProduct = "INSERT INTO [Product] " +
                                        "([Name], [ProductNumber], [Color], [StandardCost], [ListPrice], [Size], [Weight], [ProductCategoryID], [ProductModelID], [SellStartDate], [SellEndDate], [DiscontinuedDate], [ThumbnailPhotoFileName], [rowguid], [ModifiedDate]) " +
-                                       "VALUES ('{0}', '{1}', '{2}', {3}, {4}, '{5}', {6}, {7}, {8}, '{9}', '{10}', '{11}', '{12}', '{13}', '{14}')";
+                                       "VALUES ('{0}', '{1}', {2}, {3}, {4}, {5}, {6}, {7}, {8}, '{9}', {10}, {11}, {12}, {13}, '{14}')";
 
             insertIntoProduct = sqlDialect switch
             {
@@ -101,20 +101,75 @@
                 insertIntoProduct,
                 this.Name.Replace("'", "''"),
                 this.ProductNumber.Replace("'", "''"),
-                this.Color.Replace("'", "''"),
+                !string.IsNullOrEmpty(this.Color) ? $"'{this.Color.Replace("'", "''")}'" : "NULL",
                 this.StandardCost.ToString(CultureInfo.InvariantCulture),
                 this.ListPrice.ToString(CultureInfo.InvariantCulture),
-                this.Size is null ? "NULL" : this.Size.Replace("'", "''"),
+                !string.IsNullOrEmpty(this.Size) ? $"'{this.Size.Replace("'", "''")}'" : "NULL",
                 this.Weight.HasValue ? this.Weight.Value.ToString(CultureInfo.InvariantCulture) : "NULL",
                 this.ProductCategoryID.HasValue ? this.ProductCategoryID.Value.ToString() : "NULL",
                 this.ProductModelID.HasValue ? this.ProductModelID.Value.ToString() : "NULL",
                 this.SellStartDate.ToString("yyyy-MM-dd HH:mm:ss"),
-                this.SellEndDate.HasValue ? this.SellEndDate.Value.ToString("yyyy-MM-dd HH:mm:ss") : "NULL",
-                this.DiscontinuedDate.HasValue ? this.DiscontinuedDate.Value.ToString("yyyy-MM-dd HH:mm:ss") : "NULL",
-                this.ThumbnailPhotoFileName is null ? "NULL" : this.ThumbnailPhotoFileName.Replace("'", "''"),
-                this.rowguid.HasValue ? $"{this.rowguid.Value}" : "NULL",
+                this.SellEndDate.HasValue ? $"'{this.SellEndDate.Value:yyyy-MM-dd HH:mm:ss}'" : "NULL",
+                this.DiscontinuedDate.HasValue ? $"'{this.DiscontinuedDate.Value:yyyy-MM-dd HH:mm:ss}'" : "NULL",
+                !string.IsNullOrEmpty(this.ThumbnailPhotoFileName) ? $"'{this.ThumbnailPhotoFileName.Replace("'", "''")}'" : "NULL",
+                this.rowguid.HasValue ? $"'{this.rowguid.Value}'" : "NULL",
                 this.ModifiedDate.ToString("yyyy-MM-dd HH:mm:ss")
             );
+        }
+
+        internal string GenerateUpdateStatementWithoutParameters(SqlDialect sqlDialect)
+        {
+            var updateProduct = @"UPDATE [Product] SET 
+    [Name] = '{0}',
+    [ProductNumber] = '{1}',
+    [Color] = {2},
+    [StandardCost] = {3},
+    [ListPrice] = {4},
+    [Size] = {5},
+    [Weight] = {6},
+    [ProductCategoryID] = {7},
+    [ProductModelID] = {8},
+    [SellStartDate] = '{9}',
+    [SellEndDate] = {10},
+    [DiscontinuedDate] = {11},
+    [ThumbnailPhotoFileName] = {12},
+    [rowguid] = {13},
+    [ModifiedDate] = '{14}'
+WHERE [ProductID] = {15}
+";
+
+            updateProduct = SwitchDialectOnQuery(sqlDialect, updateProduct);
+
+            return string.Format(
+                updateProduct,
+                this.Name.Replace("'", "''"),
+                this.ProductNumber.Replace("'", "''"),
+                !string.IsNullOrEmpty(this.Color) ? $"'{this.Color.Replace("'", "''")}'" : "NULL",
+                this.StandardCost.ToString(CultureInfo.InvariantCulture),
+                this.ListPrice.ToString(CultureInfo.InvariantCulture),
+                !string.IsNullOrEmpty(this.Size) ? $"'{this.Size.Replace("'", "''")}'" : "NULL",
+                this.Weight.HasValue ? this.Weight.Value.ToString(CultureInfo.InvariantCulture) : "NULL",
+                this.ProductCategoryID.HasValue ? this.ProductCategoryID.Value.ToString() : "NULL",
+                this.ProductModelID.HasValue ? this.ProductModelID.Value.ToString() : "NULL",
+                this.SellStartDate.ToString("yyyy-MM-dd HH:mm:ss"),
+                this.SellEndDate.HasValue ? $"'{this.SellEndDate.Value:yyyy-MM-dd HH:mm:ss}'" : "NULL",
+                this.DiscontinuedDate.HasValue ? $"'{this.DiscontinuedDate.Value:yyyy-MM-dd HH:mm:ss}'" : "NULL",
+                !string.IsNullOrEmpty(this.ThumbnailPhotoFileName) ? $"'{this.ThumbnailPhotoFileName.Replace("'", "''")}'" : "NULL",
+                this.rowguid.HasValue ? $"'{this.rowguid.Value}'" : "NULL",
+                this.ModifiedDate.ToString("yyyy-MM-dd HH:mm:ss"),
+                this.ProductID
+            );
+        }
+
+        private static string SwitchDialectOnQuery(SqlDialect sqlDialect, string query)
+        {
+            query = sqlDialect switch
+            {
+                SqlDialect.PostgreSql => query.Replace('[', '"').Replace(']', '"'),
+                SqlDialect.MySql => query.Replace('[', '`').Replace(']', '`'),
+                _ => query
+            };
+            return query;
         }
 
         internal string GenerateDeleteStatementWithoutParameters(SqlDialect sqlDialect)
