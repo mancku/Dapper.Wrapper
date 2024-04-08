@@ -90,12 +90,7 @@
                                        "([Name], [ProductNumber], [Color], [StandardCost], [ListPrice], [Size], [Weight], [ProductCategoryID], [ProductModelID], [SellStartDate], [SellEndDate], [DiscontinuedDate], [ThumbnailPhotoFileName], [rowguid], [ModifiedDate]) " +
                                        "VALUES ('{0}', '{1}', {2}, {3}, {4}, {5}, {6}, {7}, {8}, '{9}', {10}, {11}, {12}, {13}, '{14}')";
 
-            insertIntoProduct = sqlDialect switch
-            {
-                SqlDialect.PostgreSql => insertIntoProduct.Replace('[', '"').Replace(']', '"'),
-                SqlDialect.MySql => insertIntoProduct.Replace('[', '`').Replace(']', '`'),
-                _ => insertIntoProduct
-            };
+            insertIntoProduct = insertIntoProduct.SwitchDialect(sqlDialect);
 
             return string.Format(
                 insertIntoProduct,
@@ -138,7 +133,7 @@
 WHERE [ProductID] = {15}
 ";
 
-            updateProduct = SwitchDialectOnQuery(sqlDialect, updateProduct);
+            updateProduct = updateProduct.SwitchDialect(sqlDialect);
 
             return string.Format(
                 updateProduct,
@@ -159,17 +154,6 @@ WHERE [ProductID] = {15}
                 this.ModifiedDate.ToString("yyyy-MM-dd HH:mm:ss"),
                 this.ProductID
             );
-        }
-
-        private static string SwitchDialectOnQuery(SqlDialect sqlDialect, string query)
-        {
-            query = sqlDialect switch
-            {
-                SqlDialect.PostgreSql => query.Replace('[', '"').Replace(']', '"'),
-                SqlDialect.MySql => query.Replace('[', '`').Replace(']', '`'),
-                _ => query
-            };
-            return query;
         }
 
         internal string GenerateDeleteStatementWithoutParameters(SqlDialect sqlDialect)
