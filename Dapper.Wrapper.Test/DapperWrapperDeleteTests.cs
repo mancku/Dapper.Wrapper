@@ -129,12 +129,12 @@
             var product = this.GetRandomProduct(dapperWrapper);
 
             // Act
-            var numOfLinesDeleted = dapperWrapper.Execute(
+            var numOfRowsDeleted = dapperWrapper.Execute(
                 product.GenerateDeleteStatementWithoutParameters(sqlDialect),
                     null, false, null, CommandType.Text);
 
             // Assert
-            AssertDeletedFromQuery(numOfLinesDeleted, product, dapperWrapper);
+            AssertDeletedFromQuery(numOfRowsDeleted, product, dapperWrapper);
         }
 
         [Theory]
@@ -148,12 +148,12 @@
             var product = this.GetRandomProduct(dapperWrapper);
 
             // Act
-            var numOfLinesDeleted = await dapperWrapper.ExecuteAsync(
+            var numOfRowsDeleted = await dapperWrapper.ExecuteAsync(
                 product.GenerateDeleteStatementWithoutParameters(sqlDialect),
                 null, false, null, CommandType.Text);
 
             // Assert
-            AssertDeletedFromQuery(numOfLinesDeleted, product, dapperWrapper);
+            AssertDeletedFromQuery(numOfRowsDeleted, product, dapperWrapper);
         }
 
 
@@ -168,13 +168,13 @@
             var product = this.GetRandomProduct(dapperWrapper);
 
             // Act
-            var numOfLinesDeleted = dapperWrapper.Execute(
+            var numOfRowsDeleted = dapperWrapper.Execute(
                 product.GenerateDeleteStatementWithoutParameters(sqlDialect),
                     null, true, null, CommandType.Text);
             dapperWrapper.CommitChanges();
 
             // Assert
-            AssertDeletedFromQuery(numOfLinesDeleted, product, dapperWrapper);
+            AssertDeletedFromQuery(numOfRowsDeleted, product, dapperWrapper);
         }
 
         [Theory]
@@ -188,13 +188,13 @@
             var product = this.GetRandomProduct(dapperWrapper);
 
             // Act
-            var numOfLinesDeleted = await dapperWrapper.ExecuteAsync(
+            var numOfRowsDeleted = await dapperWrapper.ExecuteAsync(
                 product.GenerateDeleteStatementWithoutParameters(sqlDialect),
                 null, true, null, CommandType.Text);
             dapperWrapper.CommitChanges();
 
             // Assert
-            AssertDeletedFromQuery(numOfLinesDeleted, product, dapperWrapper);
+            AssertDeletedFromQuery(numOfRowsDeleted, product, dapperWrapper);
         }
 
         [Theory]
@@ -208,13 +208,13 @@
             var product = this.GetRandomProduct(dapperWrapper);
 
             // Act
-            var numOfLinesDeleted = dapperWrapper.Execute(
+            var numOfRowsDeleted = dapperWrapper.Execute(
                 product.GenerateDeleteStatementWithoutParameters(sqlDialect),
                     null, true, null, CommandType.Text);
             dapperWrapper.RollbackChanges();
 
             // Assert
-            AssertNotDeletedFromQuery(numOfLinesDeleted, product, dapperWrapper);
+            AssertNotDeletedFromQuery(numOfRowsDeleted, product, dapperWrapper);
         }
 
         [Theory]
@@ -228,13 +228,13 @@
             var product = this.GetRandomProduct(dapperWrapper);
 
             // Act
-            var numOfLinesDeleted = await dapperWrapper.ExecuteAsync(
+            var numOfRowsDeleted = await dapperWrapper.ExecuteAsync(
                 product.GenerateDeleteStatementWithoutParameters(sqlDialect),
                 null, true, null, CommandType.Text);
             dapperWrapper.RollbackChanges();
 
             // Assert
-            AssertNotDeletedFromQuery(numOfLinesDeleted, product, dapperWrapper);
+            AssertNotDeletedFromQuery(numOfRowsDeleted, product, dapperWrapper);
         }
 
         private static void AssertDeleted(Product product, DapperWrapper dapperWrapper)
@@ -258,20 +258,20 @@
             notDeleted.ProductID.Should().Be(product.ProductID);
         }
 
-        private static void AssertDeletedFromQuery(int numOfLinesDeleted, Product product, DapperWrapper dapperWrapper)
+        private static void AssertDeletedFromQuery(int numOfRowsDeleted, Product product, DapperWrapper dapperWrapper)
         {
             var result = RetrieveDeletedProduct(dapperWrapper, product.ProductID);
 
-            numOfLinesDeleted.Should().Be(1);
+            numOfRowsDeleted.Should().Be(1);
             result.Any().Should().BeFalse();
         }
 
-        private static void AssertNotDeletedFromQuery(int numOfLinesDeleted, Product product, DapperWrapper dapperWrapper)
+        private static void AssertNotDeletedFromQuery(int numOfRowsDeleted, Product product, DapperWrapper dapperWrapper)
         {
             var result = RetrieveDeletedProduct(dapperWrapper, product.ProductID);
 
             // Assert
-            numOfLinesDeleted.Should().Be(1);
+            numOfRowsDeleted.Should().Be(1);
             AssertProductId(product);
             result.Any().Should().BeTrue();
             result.Count.Should().Be(1);
