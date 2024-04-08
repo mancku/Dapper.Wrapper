@@ -144,12 +144,12 @@
 
             // Act
             ModifyProduct(product, sqlDialect);
-            var numOfLinesUpdated = dapperWrapper.Execute(
+            var numOfRowsUpdated = dapperWrapper.Execute(
                 product.GenerateUpdateStatementWithoutParameters(sqlDialect),
                     null, false, null, CommandType.Text);
 
             // Assert
-            AssertUpdatedFromQuery(numOfLinesUpdated, product, dapperWrapper, originalProductName);
+            AssertUpdatedFromQuery(numOfRowsUpdated, product, dapperWrapper, originalProductName);
         }
 
         [Theory]
@@ -165,12 +165,12 @@
 
             // Act
             ModifyProduct(product, sqlDialect);
-            var numOfLinesUpdated = await dapperWrapper.ExecuteAsync(
+            var numOfRowsUpdated = await dapperWrapper.ExecuteAsync(
                 product.GenerateUpdateStatementWithoutParameters(sqlDialect),
                 null, false, null, CommandType.Text);
 
             // Assert
-            AssertUpdatedFromQuery(numOfLinesUpdated, product, dapperWrapper, originalProductName);
+            AssertUpdatedFromQuery(numOfRowsUpdated, product, dapperWrapper, originalProductName);
         }
 
 
@@ -187,13 +187,13 @@
 
             // Act
             ModifyProduct(product, sqlDialect);
-            var numOfLinesUpdated = dapperWrapper.Execute(
+            var numOfRowsUpdated = dapperWrapper.Execute(
                 product.GenerateUpdateStatementWithoutParameters(sqlDialect),
                     null, true, null, CommandType.Text);
             dapperWrapper.CommitChanges();
 
             // Assert
-            AssertUpdatedFromQuery(numOfLinesUpdated, product, dapperWrapper, originalProductName);
+            AssertUpdatedFromQuery(numOfRowsUpdated, product, dapperWrapper, originalProductName);
         }
 
         [Theory]
@@ -209,13 +209,13 @@
 
             // Act
             ModifyProduct(product, sqlDialect);
-            var numOfLinesUpdated = await dapperWrapper.ExecuteAsync(
+            var numOfRowsUpdated = await dapperWrapper.ExecuteAsync(
                 product.GenerateUpdateStatementWithoutParameters(sqlDialect),
                 null, true, null, CommandType.Text);
             dapperWrapper.CommitChanges();
 
             // Assert
-            AssertUpdatedFromQuery(numOfLinesUpdated, product, dapperWrapper, originalProductName);
+            AssertUpdatedFromQuery(numOfRowsUpdated, product, dapperWrapper, originalProductName);
         }
 
         [Theory]
@@ -231,13 +231,13 @@
 
             // Act
             ModifyProduct(product, sqlDialect);
-            var numOfLinesUpdated = dapperWrapper.Execute(
+            var numOfRowsUpdated = dapperWrapper.Execute(
                 product.GenerateUpdateStatementWithoutParameters(sqlDialect),
                     null, true, null, CommandType.Text);
             dapperWrapper.RollbackChanges();
 
             // Assert
-            AssertNotUpdatedFromQuery(numOfLinesUpdated, product, dapperWrapper, originalProductName);
+            AssertNotUpdatedFromQuery(numOfRowsUpdated, product, dapperWrapper, originalProductName);
         }
 
         [Theory]
@@ -253,13 +253,13 @@
 
             // Act
             ModifyProduct(product, sqlDialect);
-            var numOfLinesUpdated = await dapperWrapper.ExecuteAsync(
+            var numOfRowsUpdated = await dapperWrapper.ExecuteAsync(
                 product.GenerateUpdateStatementWithoutParameters(sqlDialect),
                 null, true, null, CommandType.Text);
             dapperWrapper.RollbackChanges();
 
             // Assert
-            AssertNotUpdatedFromQuery(numOfLinesUpdated, product, dapperWrapper, originalProductName);
+            AssertNotUpdatedFromQuery(numOfRowsUpdated, product, dapperWrapper, originalProductName);
         }
 
         private static void AssertUpdated(Product product, DapperWrapper dapperWrapper, string originalProductName)
@@ -282,9 +282,9 @@
             product.Name.Should().NotBeEquivalentTo(notUpdated.Name);
         }
 
-        private static void AssertUpdatedFromQuery(int numOfLinesUpdated, Product product, DapperWrapper dapperWrapper, string originalProductName)
+        private static void AssertUpdatedFromQuery(int numOfRowsUpdated, Product product, DapperWrapper dapperWrapper, string originalProductName)
         {
-            numOfLinesUpdated.Should().Be(1);
+            numOfRowsUpdated.Should().Be(1);
 
             var result = RetrieveUpdatedProduct(dapperWrapper, product.ProductID);
             result.Any().Should().BeTrue();
@@ -294,9 +294,9 @@
             product.Name.Should().BeEquivalentTo(updated.Name);
         }
 
-        private static void AssertNotUpdatedFromQuery(int numOfLinesUpdated, Product product, DapperWrapper dapperWrapper, string originalProductName)
+        private static void AssertNotUpdatedFromQuery(int numOfRowsUpdated, Product product, DapperWrapper dapperWrapper, string originalProductName)
         {
-            numOfLinesUpdated.Should().Be(1);
+            numOfRowsUpdated.Should().Be(1);
 
             var result = RetrieveUpdatedProduct(dapperWrapper, product.ProductID);
             result.Any().Should().BeTrue();

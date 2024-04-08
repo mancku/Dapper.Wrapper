@@ -134,7 +134,7 @@
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var products = this.GetRandomProducts(dapperWrapper);
             var filter = this.GetProductsIdsToDelete(products, true);
-            var query = $"Delete FROM [{nameof(Product):T}] WHERE {filter}".SwitchDialect(sqlDialect);
+            var query = GetDeleteQuery(sqlDialect, filter);
 
             // Act
             var result = dapperWrapper.Execute(query,
@@ -155,7 +155,7 @@
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var products = this.GetRandomProducts(dapperWrapper);
             var filter = this.GetProductsIdsToDelete(products, true);
-            var query = $"Delete FROM [{nameof(Product):T}] WHERE {filter}".SwitchDialect(sqlDialect);
+            var query = GetDeleteQuery(sqlDialect, filter);
 
             // Act
             var result = await dapperWrapper.ExecuteAsync(query,
@@ -177,7 +177,7 @@
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var products = this.GetRandomProducts(dapperWrapper);
             var filter = this.GetProductsIdsToDelete(products, true);
-            var query = $"Delete FROM [{nameof(Product):T}] WHERE {filter}".SwitchDialect(sqlDialect);
+            var query = GetDeleteQuery(sqlDialect, filter);
 
             // Act
             var result = dapperWrapper.Execute(query,
@@ -199,7 +199,7 @@
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var products = this.GetRandomProducts(dapperWrapper);
             var filter = this.GetProductsIdsToDelete(products, true);
-            var query = $"Delete FROM [{nameof(Product):T}] WHERE {filter}".SwitchDialect(sqlDialect);
+            var query = GetDeleteQuery(sqlDialect, filter);
 
             // Act
             var result = await dapperWrapper.ExecuteAsync(query,
@@ -221,7 +221,7 @@
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var products = this.GetRandomProducts(dapperWrapper);
             var filter = this.GetProductsIdsToDelete(products, true);
-            var query = $"Delete FROM [{nameof(Product):T}] WHERE {filter}".SwitchDialect(sqlDialect);
+            var query = GetDeleteQuery(sqlDialect, filter);
 
             // Act
             var result = dapperWrapper.Execute(query,
@@ -243,7 +243,7 @@
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var products = this.GetRandomProducts(dapperWrapper);
             var filter = this.GetProductsIdsToDelete(products, true);
-            var query = $"Delete FROM [{nameof(Product):T}] WHERE {filter}".SwitchDialect(sqlDialect);
+            var query = GetDeleteQuery(sqlDialect, filter);
 
             // Act
             var result = await dapperWrapper.ExecuteAsync(query,
@@ -308,6 +308,11 @@
                 : $"{nameof(Product.ProductID):C}";
             FormattableString filter = $"{columnName} IN ({string.Join(',', productsIds)})";
             return filter;
+        }
+
+        private static string GetDeleteQuery(SqlDialect sqlDialect, FormattableString filter)
+        {
+            return $"Delete FROM [{nameof(Product):T}] WHERE {filter}".SwitchDialect(sqlDialect);
         }
 
         private List<Product> GetRandomProducts(DapperWrapper dapperWrapper)
