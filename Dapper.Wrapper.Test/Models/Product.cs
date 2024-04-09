@@ -159,15 +159,7 @@ WHERE [ProductID] = {15}
         internal string GenerateDeleteStatementWithoutParameters(SqlDialect sqlDialect)
         {
             var deleteStatement = $"DELETE FROM [Product] WHERE [ProductID] = {this.ProductID}";
-
-            deleteStatement = sqlDialect switch
-            {
-                SqlDialect.PostgreSql => deleteStatement.Replace('[', '"').Replace(']', '"'),
-                SqlDialect.MySql => deleteStatement.Replace('[', '`').Replace(']', '`'),
-                _ => deleteStatement
-            };
-
-            return deleteStatement;
+            return deleteStatement.SwitchDialect(sqlDialect);
         }
     }
 }

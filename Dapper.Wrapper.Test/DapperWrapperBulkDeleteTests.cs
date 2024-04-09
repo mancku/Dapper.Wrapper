@@ -279,27 +279,6 @@
             }
         }
 
-        //private static void AssertDeletedFromQuery(int numOfRowsDeleted, Product product, DapperWrapper dapperWrapper)
-        //{
-        //    var result = RetrieveDeletedProduct(dapperWrapper, product.ProductID);
-
-        //    numOfRowsDeleted.Should().Be(1);
-        //    result.Any().Should().BeFalse();
-        //}
-
-        //private static void AssertNotDeletedFromQuery(int numOfRowsDeleted, Product product, DapperWrapper dapperWrapper)
-        //{
-        //    var result = RetrieveDeletedProduct(dapperWrapper, product.ProductID);
-
-        //    // Assert
-        //    numOfRowsDeleted.Should().Be(1);
-        //    AssertProductId(product);
-        //    result.Any().Should().BeTrue();
-        //    result.Count.Should().Be(1);
-        //    var notDeleted = result.Single();
-        //    notDeleted.ProductID.Should().Be(product.ProductID);
-        //}
-
         private FormattableString GetProductsIdsToDelete(IEnumerable<Product> products, bool addColumnDelimiters)
         {
             var productsIds = products.Select(x => x.ProductID);
@@ -332,10 +311,5 @@
             var num = Faker.Random.Number(2, 5);
             return Faker.Random.ListItems(products, num).ToList();
         }
-
-        //private static List<Product> RetrieveDeletedProducts(DapperWrapper dapperWrapper, FormattableString filter)
-        //{
-        //    return dapperWrapper.FindAsList<Product>(filter);
-        //}
     }
 }
