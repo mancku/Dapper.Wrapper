@@ -21,7 +21,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToDelete(products, false);
 
             // Act
@@ -39,7 +39,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToDelete(products, false);
 
             // Act
@@ -57,7 +57,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToDelete(products, false);
 
             // Act
@@ -76,7 +76,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToDelete(products, false);
             // Act
             var result = await dapperWrapper.BulkDeleteAsync<Product>(filter);
@@ -94,7 +94,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToDelete(products, false);
 
             // Act
@@ -113,7 +113,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToDelete(products, false);
 
             // Act
@@ -132,7 +132,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToDelete(products, true);
             var query = GetDeleteQuery(sqlDialect, filter);
 
@@ -153,7 +153,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToDelete(products, true);
             var query = GetDeleteQuery(sqlDialect, filter);
 
@@ -175,7 +175,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToDelete(products, true);
             var query = GetDeleteQuery(sqlDialect, filter);
 
@@ -197,7 +197,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToDelete(products, true);
             var query = GetDeleteQuery(sqlDialect, filter);
 
@@ -219,7 +219,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToDelete(products, true);
             var query = GetDeleteQuery(sqlDialect, filter);
 
@@ -241,7 +241,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToDelete(products, true);
             var query = GetDeleteQuery(sqlDialect, filter);
 
@@ -292,24 +292,6 @@
         private static string GetDeleteQuery(SqlDialect sqlDialect, FormattableString filter)
         {
             return $"Delete FROM [{nameof(Product):T}] WHERE {filter}".SwitchDialect(sqlDialect);
-        }
-
-        private List<Product> GetRandomProducts(DapperWrapper dapperWrapper)
-        {
-            var products = dapperWrapper.FindAsList<Product>(statement =>
-                {
-                    statement.ShouldUseTransaction(true);
-                    statement.Include<SalesOrderDetail>(join =>
-                    {
-                        dapperWrapper.OverrideJoinDialect(join);
-                        join.LeftOuterJoin();
-                    });
-                })
-                .Where(x => !x.SalesOrderDetails.Any())
-                .ToList();
-
-            var num = Faker.Random.Number(2, 5);
-            return Faker.Random.ListItems(products, num).ToList();
         }
     }
 }

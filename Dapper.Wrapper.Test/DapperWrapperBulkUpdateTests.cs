@@ -22,7 +22,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToUpdate(products, false);
             //var product = new ProductToUpdate(Faker);
             var product = new ProductToUpdate(Faker);
@@ -42,7 +42,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToUpdate(products, false);
             var product = new ProductToUpdate(Faker);
 
@@ -61,7 +61,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToUpdate(products, false);
             var product = new ProductToUpdate(Faker);
 
@@ -81,7 +81,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToUpdate(products, false);
             var product = new ProductToUpdate(Faker);
 
@@ -101,7 +101,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToUpdate(products, false);
             var product = new ProductToUpdate(Faker);
 
@@ -121,7 +121,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToUpdate(products, false);
             var product = new ProductToUpdate(Faker);
 
@@ -141,7 +141,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToUpdate(products, true);
             var product = new ProductToUpdate(Faker);
             var query = GetUpdateQuery(sqlDialect, product, filter);
@@ -163,7 +163,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToUpdate(products, true);
             var product = new ProductToUpdate(Faker);
             var query = GetUpdateQuery(sqlDialect, product, filter);
@@ -186,7 +186,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToUpdate(products, true);
             var product = new ProductToUpdate(Faker);
             var query = GetUpdateQuery(sqlDialect, product, filter);
@@ -209,7 +209,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToUpdate(products, true);
             var product = new ProductToUpdate(Faker);
             var query = GetUpdateQuery(sqlDialect, product, filter);
@@ -232,7 +232,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToUpdate(products, true);
             var product = new ProductToUpdate(Faker);
             var query = GetUpdateQuery(sqlDialect, product, filter);
@@ -255,7 +255,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var products = this.GetRandomProducts(dapperWrapper);
+            var products = dapperWrapper.GetRandomProducts(Faker);
             var filter = this.GetProductsIdsToUpdate(products, true);
             var product = new ProductToUpdate(Faker);
             var query = GetUpdateQuery(sqlDialect, product, filter);
@@ -331,24 +331,6 @@
 [{nameof(ProductToUpdate.ModifiedDate):C}] = '{modifiedDate}',
 [{nameof(ProductToUpdate.StandardCost):C}] = {standardCost}
 WHERE {filter}".SwitchDialect(sqlDialect);
-        }
-
-        private List<Product> GetRandomProducts(DapperWrapper dapperWrapper)
-        {
-            var products = dapperWrapper.FindAsList<Product>(statement =>
-                {
-                    statement.ShouldUseTransaction(true);
-                    statement.Include<SalesOrderDetail>(join =>
-                    {
-                        dapperWrapper.OverrideJoinDialect(join);
-                        join.LeftOuterJoin();
-                    });
-                })
-                .Where(x => !x.SalesOrderDetails.Any())
-                .ToList();
-
-            var num = Faker.Random.Number(2, 5);
-            return Faker.Random.ListItems(products, num).ToList();
         }
     }
 }

@@ -20,7 +20,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var product = this.GetRandomProduct(dapperWrapper);
+            var product = dapperWrapper.GetRandomProduct(Faker);
 
             // Act
             dapperWrapper.Delete(product, false);
@@ -37,7 +37,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var product = this.GetRandomProduct(dapperWrapper);
+            var product = dapperWrapper.GetRandomProduct(Faker);
 
             // Act
             await dapperWrapper.DeleteAsync(product, false);
@@ -54,7 +54,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var product = this.GetRandomProduct(dapperWrapper);
+            var product = dapperWrapper.GetRandomProduct(Faker);
 
             // Act
             dapperWrapper.Delete(product);
@@ -72,7 +72,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var product = this.GetRandomProduct(dapperWrapper);
+            var product = dapperWrapper.GetRandomProduct(Faker);
 
             // Act
             await dapperWrapper.DeleteAsync(product);
@@ -90,7 +90,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var product = this.GetRandomProduct(dapperWrapper);
+            var product = dapperWrapper.GetRandomProduct(Faker);
 
             // Act
             dapperWrapper.Delete(product);
@@ -108,7 +108,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var product = this.GetRandomProduct(dapperWrapper);
+            var product = dapperWrapper.GetRandomProduct(Faker);
 
             // Act
             await dapperWrapper.DeleteAsync(product);
@@ -126,7 +126,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var product = this.GetRandomProduct(dapperWrapper);
+            var product = dapperWrapper.GetRandomProduct(Faker);
 
             // Act
             var numOfRowsDeleted = dapperWrapper.Execute(
@@ -145,7 +145,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var product = this.GetRandomProduct(dapperWrapper);
+            var product = dapperWrapper.GetRandomProduct(Faker);
 
             // Act
             var numOfRowsDeleted = await dapperWrapper.ExecuteAsync(
@@ -165,7 +165,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var product = this.GetRandomProduct(dapperWrapper);
+            var product = dapperWrapper.GetRandomProduct(Faker);
 
             // Act
             var numOfRowsDeleted = dapperWrapper.Execute(
@@ -185,7 +185,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var product = this.GetRandomProduct(dapperWrapper);
+            var product = dapperWrapper.GetRandomProduct(Faker);
 
             // Act
             var numOfRowsDeleted = await dapperWrapper.ExecuteAsync(
@@ -205,7 +205,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var product = this.GetRandomProduct(dapperWrapper);
+            var product = dapperWrapper.GetRandomProduct(Faker);
 
             // Act
             var numOfRowsDeleted = dapperWrapper.Execute(
@@ -225,7 +225,7 @@
         {
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
-            var product = this.GetRandomProduct(dapperWrapper);
+            var product = dapperWrapper.GetRandomProduct(Faker);
 
             // Act
             var numOfRowsDeleted = await dapperWrapper.ExecuteAsync(
@@ -277,24 +277,6 @@
             result.Count.Should().Be(1);
             var notDeleted = result.Single();
             notDeleted.ProductID.Should().Be(product.ProductID);
-        }
-
-        private Product GetRandomProduct(DapperWrapper dapperWrapper)
-        {
-            var products = dapperWrapper.FindAsList<Product>(statement =>
-                {
-                    statement.ShouldUseTransaction(true);
-                    statement.Include<SalesOrderDetail>(join =>
-                    {
-                        dapperWrapper.OverrideJoinDialect(join);
-                        join.LeftOuterJoin();
-                    });
-                })
-                .Where(x => !x.SalesOrderDetails.Any())
-                .ToList();
-
-            var product = Faker.Random.ListItem(products);
-            return product;
         }
 
         private static void AssertProductId(Product product)
