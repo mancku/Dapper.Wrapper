@@ -40,6 +40,27 @@
             return this.GetConnection(options.UseTransaction);
         }
 
+        private IDbConnection GetConnection<T>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<T>>? statementOptions = null)
+        {
+            var options = new RangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<T>();
+            statementOptions?.Invoke(options);
+            return this.GetConnection(options.UseTransaction);
+        }
+
+        private IDbConnection GetConnection<T>(Action<ISelectSqlStatementOptionsBuilder<T>>? statementOptions = null)
+        {
+            var options = new SelectSqlStatementOptionsBuilder<T>();
+            statementOptions?.Invoke(options);
+            return this.GetConnection(options.UseTransaction);
+        }
+
+        private IDbConnection GetConnection<T>(Action<IConditionalSqlStatementOptionsBuilder<T>>? statementOptions = null)
+        {
+            var options = new ConditionalSqlStatementOptionsBuilder<T>();
+            statementOptions?.Invoke(options);
+            return this.GetConnection(options.UseTransaction);
+        }
+
         private IDbConnection GetConnection(bool isTransactional = false)
         {
             var connection = isTransactional ? this.TransactionalConnection : this.Connection;

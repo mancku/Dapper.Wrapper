@@ -25,7 +25,8 @@
         {
             var options = this.SetRangedBatchSqlStatementOptions<TEntity>(isTransactional, filter, orderBy,
                 commandTimeout, top, skip);
-            return this.GetConnection(isTransactional).Find(Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            return this.GetConnection(isTransactional).Find(Transaction, options);
         }
 
         /// <summary>
@@ -33,12 +34,12 @@
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned records.</typeparam>
         /// <param name="options">An action that accepts an IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder instance of TEntity, 
-        /// allowing the caller to configure the query options, such as specifying filtering, ordering, and paging parameters.</param>
+        /// allowing the caller to configure the query options, such as specifying filtering or ordering parameters.</param>
         /// <returns>An IEnumerable of type TEntity containing the records that match the query criteria.</returns>
         public IEnumerable<TEntity> Find<TEntity>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> options)
         {
-            var standardOptions = options as Action<IStandardSqlStatementOptionsBuilder<TEntity>>;
-            return this.GetConnection(standardOptions).Find(Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            return this.GetConnection(options).Find(Transaction, options);
         }
 
         /// <summary>
@@ -64,7 +65,7 @@
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned records.</typeparam>
         /// <param name="options">An action that accepts an IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder instance of TEntity, 
-        /// allowing the caller to configure the query options, such as specifying filtering, ordering, and paging parameters.</param>
+        /// allowing the caller to configure the query options, such as specifying filtering or ordering parameters.</param>
         /// <returns>A List of type TEntity containing the records that match the query criteria.</returns>
         public List<TEntity> FindAsList<TEntity>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> options)
         {
@@ -87,7 +88,8 @@
         {
             var options = this.SetRangedBatchSqlStatementOptions<TEntity>(isTransactional, filter,
                 orderBy, commandTimeout, top, skip);
-            return await this.GetConnection(isTransactional).FindAsync(Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            return await this.GetConnection(isTransactional).FindAsync(Transaction, options);
         }
 
         /// <summary>
@@ -95,12 +97,12 @@
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned records.</typeparam>
         /// <param name="options">An action that accepts an IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder instance of TEntity, 
-        /// allowing the caller to configure the query options, such as specifying filtering, ordering, and paging parameters.</param>
+        /// allowing the caller to configure the query options, such as specifying filtering or ordering parameters.</param>
         /// <returns>A Task of IEnumerable of type TEntity containing the records that match the query criteria.</returns>
         public async Task<IEnumerable<TEntity>> FindAsync<TEntity>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> options)
         {
-            var standardOptions = options as Action<IStandardSqlStatementOptionsBuilder<TEntity>>;
-            return await this.GetConnection(standardOptions).FindAsync(Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            return await this.GetConnection(options).FindAsync(Transaction, options);
         }
 
         /// <summary>
@@ -126,7 +128,7 @@
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned records.</typeparam>
         /// <param name="options">An action that accepts an IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder instance of TEntity, 
-        /// allowing the caller to configure the query options, such as specifying filtering, ordering, and paging parameters.</param>
+        /// allowing the caller to configure the query options, such as specifying filtering or ordering parameters.</param>
         /// <returns>A Task of List of type TEntity containing the records that match the query criteria.</returns>
         public async Task<List<TEntity>> FindAsListAsync<TEntity>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> options)
         {
@@ -158,8 +160,8 @@
         /// <returns>Returns a single entity or NULL if none could be found.</returns>
         public TEntity? Get<TEntity>(TEntity entityKeys, Action<ISelectSqlStatementOptionsBuilder<TEntity>> options)
         {
-            var standardOptions = options as Action<IStandardSqlStatementOptionsBuilder<TEntity>>;
-            return this.GetConnection(standardOptions).Get(entityKeys, Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            return this.GetConnection(options).Get(entityKeys, Transaction, options);
         }
 
         /// <summary>
@@ -186,8 +188,8 @@
         /// <returns>Returns a Task of a single entity or NULL if none could be found.</returns>
         public async Task<TEntity?> GetAsync<TEntity>(TEntity entityKeys, Action<ISelectSqlStatementOptionsBuilder<TEntity>> options)
         {
-            var standardOptions = options as Action<IStandardSqlStatementOptionsBuilder<TEntity>>;
-            return await this.GetConnection(standardOptions).GetAsync(entityKeys, Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            return await this.GetConnection(options).GetAsync(entityKeys, Transaction, options);
         }
 
         /// <summary>
@@ -202,7 +204,21 @@
             bool isTransactional = false, TimeSpan? commandTimeout = null)
         {
             var options = this.SetConditionalSqlStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
-            return this.GetConnection(isTransactional).Count(Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            return this.GetConnection(isTransactional).Count(Transaction, options);
+        }
+
+        /// <summary>
+        /// Counts records based on specified conditions and parameters, allowing customization of the query's behavior and results.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the main table where to count records.</typeparam>
+        /// <param name="options">An action that accepts an IConditionalSqlStatementOptionsBuilder instance of TEntity, 
+        /// allowing the caller to configure the query options, such as specifying filtering or ordering.</param>
+        /// <returns>The number of records that fulfill the conditions</returns>
+        public int Count<TEntity>(Action<IConditionalSqlStatementOptionsBuilder<TEntity>> options)
+        {
+            options = this.OverrideDialectInOptions(options);
+            return this.GetConnection(options).Count(Transaction, options);
         }
 
         /// <summary>
@@ -217,7 +233,21 @@
             bool isTransactional = false, TimeSpan? commandTimeout = null)
         {
             var options = this.SetConditionalSqlStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
-            return await this.GetConnection(isTransactional).CountAsync(Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            return await this.GetConnection(isTransactional).CountAsync(Transaction, options);
+        }
+
+        /// <summary>
+        /// Asynchronously counts records based on specified conditions and parameters, allowing customization of the query's behavior and results.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the main table where to count records.</typeparam>
+        /// <param name="options">An action that accepts an IConditionalSqlStatementOptionsBuilder instance of TEntity, 
+        /// allowing the caller to configure the query options, such as specifying filtering or ordering.</param>
+        /// <returns>The number of records that fulfill the conditions</returns>
+        public async Task<int> CountAsync<TEntity>(Action<IConditionalSqlStatementOptionsBuilder<TEntity>> options)
+        {
+            options = this.OverrideDialectInOptions(options);
+            return await this.GetConnection(options).CountAsync(Transaction, options);
         }
 
         /// <summary>
@@ -231,7 +261,8 @@
         public void Insert<TEntity>(TEntity objectToInsert, bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
             var options = this.SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
-            this.GetConnection(isTransactional).Insert(objectToInsert, Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            this.GetConnection(isTransactional).Insert(objectToInsert, Transaction, options);
         }
 
         /// <summary>
@@ -245,7 +276,8 @@
         public async Task InsertAsync<TEntity>(TEntity objectToInsert, bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
             var options = this.SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
-            await this.GetConnection(isTransactional).InsertAsync(objectToInsert, Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            await this.GetConnection(isTransactional).InsertAsync(objectToInsert, Transaction, options);
         }
 
         /// <summary>
@@ -259,7 +291,8 @@
         public bool Update<TEntity>(TEntity objectToUpdate, bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
             var options = this.SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
-            return this.GetConnection(isTransactional).Update(objectToUpdate, Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            return this.GetConnection(isTransactional).Update(objectToUpdate, Transaction, options);
         }
 
         /// <summary>
@@ -274,7 +307,8 @@
             TimeSpan? commandTimeout = null)
         {
             var options = this.SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
-            return await this.GetConnection(isTransactional).UpdateAsync(objectToUpdate, Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            return await this.GetConnection(isTransactional).UpdateAsync(objectToUpdate, Transaction, options);
         }
 
         /// <summary>
@@ -294,7 +328,8 @@
             TimeSpan? commandTimeout = null)
         {
             var options = this.SetConditionalBulkStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
-            return this.GetConnection(isTransactional).BulkUpdate(objectToUpdate, Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            return this.GetConnection(isTransactional).BulkUpdate(objectToUpdate, Transaction, options);
         }
 
         /// <summary>
@@ -314,7 +349,8 @@
             bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
             var options = this.SetConditionalBulkStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
-            return await this.GetConnection(isTransactional).BulkUpdateAsync(objectToUpdate, Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            return await this.GetConnection(isTransactional).BulkUpdateAsync(objectToUpdate, Transaction, options);
         }
 
         /// <summary>
@@ -329,7 +365,8 @@
         public bool Delete<TEntity>(TEntity objectToDelete, bool isTransactional = true, TimeSpan? commandTimeout = null)
         {
             var options = this.SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
-            return this.GetConnection(isTransactional).Delete(objectToDelete, Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            return this.GetConnection(isTransactional).Delete(objectToDelete, Transaction, options);
         }
 
         /// <summary>
@@ -345,7 +382,8 @@
             TimeSpan? commandTimeout = null)
         {
             var options = this.SetStandardStatementOptions<TEntity>(isTransactional, commandTimeout);
-            return await this.GetConnection(isTransactional).DeleteAsync(objectToDelete, Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            return await this.GetConnection(isTransactional).DeleteAsync(objectToDelete, Transaction, options);
         }
 
         /// <summary>
@@ -360,7 +398,8 @@
             TimeSpan? commandTimeout = null)
         {
             var options = this.SetConditionalBulkStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
-            return this.GetConnection(isTransactional).BulkDelete(Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            return this.GetConnection(isTransactional).BulkDelete(Transaction, options);
         }
 
         /// <summary>
@@ -375,7 +414,8 @@
             TimeSpan? commandTimeout = null)
         {
             var options = this.SetConditionalBulkStatementOptions<TEntity>(isTransactional, filter, commandTimeout);
-            return await this.GetConnection(isTransactional).BulkDeleteAsync(Transaction, this.OverrideDialectInOptions(options));
+            options = this.OverrideDialectInOptions(options);
+            return await this.GetConnection(isTransactional).BulkDeleteAsync(Transaction, options);
         }
 
         public void OverrideJoinDialect<TEntity>(ISqlJoinOptionsBuilder<TEntity> join)
