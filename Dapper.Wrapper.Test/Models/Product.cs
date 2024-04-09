@@ -8,19 +8,33 @@
     using System.Globalization;
 
     [Table("Product")]
-    public class Product
+    public class ProductToUpdate
     {
+        public ProductToUpdate() { }
+
+        public ProductToUpdate(Faker faker)
+        {
+            this.ModifiedDate = DateTime.Now.AddMonths(faker.Random.Number(2, 7));
+            this.StandardCost = faker.Random.Decimal(3000m, 5000m);
+            this.StandardCost = Math.Round(this.StandardCost, 3);
+        }
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ProductID { get; set; }
 
+        public DateTime ModifiedDate { get; set; }
+        public decimal StandardCost { get; set; }
+    }
+
+    [Table("Product")]
+    public class Product : ProductToUpdate
+    {
         public string Name { get; set; }
 
         public string ProductNumber { get; set; }
 
         public string? Color { get; set; }
-
-        public decimal StandardCost { get; set; }
 
         public decimal ListPrice { get; set; }
 
@@ -43,8 +57,6 @@
         public string? ThumbnailPhotoFileName { get; set; }
 
         public Guid? rowguid { get; set; }
-
-        public DateTime ModifiedDate { get; set; }
 
         public List<SalesOrderDetail> SalesOrderDetails { get; set; } = [];
 
