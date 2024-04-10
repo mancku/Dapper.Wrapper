@@ -4,7 +4,6 @@
     using FluentAssertions;
     using Models;
     using System.Data;
-    using System.Runtime.CompilerServices;
 
     public class DapperWrapperUpdateTests : BaseDapperWrapperTests
     {
@@ -22,14 +21,16 @@
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var product = dapperWrapper.GetRandomProduct(Faker);
-            var originalProductName = product.Name;
+            var productToUpdate = new ProductToUpdate(Faker)
+            {
+                ProductID = product.ProductID
+            };
 
             // Act
-            ModifyProduct(product, sqlDialect);
-            dapperWrapper.Update(product, false);
+            var result = dapperWrapper.Update(productToUpdate, false);
 
             // Assert
-            AssertUpdated(product, dapperWrapper, originalProductName);
+            AssertUpdated(product, productToUpdate, result, dapperWrapper);
         }
 
         [Theory]
@@ -41,14 +42,16 @@
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var product = dapperWrapper.GetRandomProduct(Faker);
-            var originalProductName = product.Name;
+            var productToUpdate = new ProductToUpdate(Faker)
+            {
+                ProductID = product.ProductID
+            };
 
             // Act
-            ModifyProduct(product, sqlDialect);
-            await dapperWrapper.UpdateAsync(product, false);
+            var result = await dapperWrapper.UpdateAsync(productToUpdate, false);
 
             // Assert
-            AssertUpdated(product, dapperWrapper, originalProductName);
+            AssertUpdated(product, productToUpdate, result, dapperWrapper);
         }
 
         [Theory]
@@ -60,15 +63,17 @@
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var product = dapperWrapper.GetRandomProduct(Faker);
-            var originalProductName = product.Name;
+            var productToUpdate = new ProductToUpdate(Faker)
+            {
+                ProductID = product.ProductID
+            };
 
             // Act
-            ModifyProduct(product, sqlDialect);
-            dapperWrapper.Update(product);
+            var result = dapperWrapper.Update(productToUpdate);
             dapperWrapper.CommitChanges();
 
             // Assert
-            AssertUpdated(product, dapperWrapper, originalProductName);
+            AssertUpdated(product, productToUpdate, result, dapperWrapper);
         }
 
         [Theory]
@@ -80,15 +85,17 @@
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var product = dapperWrapper.GetRandomProduct(Faker);
-            var originalProductName = product.Name;
+            var productToUpdate = new ProductToUpdate(Faker)
+            {
+                ProductID = product.ProductID
+            };
 
             // Act
-            ModifyProduct(product, sqlDialect);
-            await dapperWrapper.UpdateAsync(product);
+            var result = await dapperWrapper.UpdateAsync(productToUpdate);
             dapperWrapper.CommitChanges();
 
             // Assert
-            AssertUpdated(product, dapperWrapper, originalProductName);
+            AssertUpdated(product, productToUpdate, result, dapperWrapper);
         }
 
         [Theory]
@@ -100,15 +107,17 @@
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var product = dapperWrapper.GetRandomProduct(Faker);
-            var originalProductName = product.Name;
+            var productToUpdate = new ProductToUpdate(Faker)
+            {
+                ProductID = product.ProductID
+            };
 
             // Act
-            ModifyProduct(product, sqlDialect);
-            dapperWrapper.Update(product);
+            var result = dapperWrapper.Update(productToUpdate);
             dapperWrapper.RollbackChanges();
 
             // Assert
-            AssertNotUpdated(product, dapperWrapper, originalProductName);
+            AssertNotUpdated(product, productToUpdate, result, dapperWrapper);
         }
 
         [Theory]
@@ -120,15 +129,17 @@
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var product = dapperWrapper.GetRandomProduct(Faker);
-            var originalProductName = product.Name;
+            var productToUpdate = new ProductToUpdate(Faker)
+            {
+                ProductID = product.ProductID
+            };
 
             // Act
-            ModifyProduct(product, sqlDialect);
-            await dapperWrapper.UpdateAsync(product);
+            var result = await dapperWrapper.UpdateAsync(productToUpdate);
             dapperWrapper.RollbackChanges();
 
             // Assert
-            AssertNotUpdated(product, dapperWrapper, originalProductName);
+            AssertNotUpdated(product, productToUpdate, result, dapperWrapper);
         }
 
         [Theory]
@@ -140,16 +151,18 @@
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var product = dapperWrapper.GetRandomProduct(Faker);
-            var originalProductName = product.Name;
+            var productToUpdate = new ProductToUpdate(Faker)
+            {
+                ProductID = product.ProductID
+            };
 
             // Act
-            ModifyProduct(product, sqlDialect);
             var numOfRowsUpdated = dapperWrapper.Execute(
-                product.GenerateUpdateStatementWithoutParameters(sqlDialect),
+                productToUpdate.GenerateUpdateStatementWithoutParameters(sqlDialect),
                     null, false, null, CommandType.Text);
 
             // Assert
-            AssertUpdatedFromQuery(numOfRowsUpdated, product, dapperWrapper, originalProductName);
+            AssertUpdatedFromQuery(numOfRowsUpdated, product, productToUpdate, dapperWrapper);
         }
 
         [Theory]
@@ -161,16 +174,18 @@
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var product = dapperWrapper.GetRandomProduct(Faker);
-            var originalProductName = product.Name;
+            var productToUpdate = new ProductToUpdate(Faker)
+            {
+                ProductID = product.ProductID
+            };
 
             // Act
-            ModifyProduct(product, sqlDialect);
             var numOfRowsUpdated = await dapperWrapper.ExecuteAsync(
-                product.GenerateUpdateStatementWithoutParameters(sqlDialect),
+                productToUpdate.GenerateUpdateStatementWithoutParameters(sqlDialect),
                 null, false, null, CommandType.Text);
 
             // Assert
-            AssertUpdatedFromQuery(numOfRowsUpdated, product, dapperWrapper, originalProductName);
+            AssertUpdatedFromQuery(numOfRowsUpdated, product, productToUpdate, dapperWrapper);
         }
 
 
@@ -183,17 +198,19 @@
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var product = dapperWrapper.GetRandomProduct(Faker);
-            var originalProductName = product.Name;
+            var productToUpdate = new ProductToUpdate(Faker)
+            {
+                ProductID = product.ProductID
+            };
 
             // Act
-            ModifyProduct(product, sqlDialect);
             var numOfRowsUpdated = dapperWrapper.Execute(
-                product.GenerateUpdateStatementWithoutParameters(sqlDialect),
+                productToUpdate.GenerateUpdateStatementWithoutParameters(sqlDialect),
                     null, true, null, CommandType.Text);
             dapperWrapper.CommitChanges();
 
             // Assert
-            AssertUpdatedFromQuery(numOfRowsUpdated, product, dapperWrapper, originalProductName);
+            AssertUpdatedFromQuery(numOfRowsUpdated, product, productToUpdate, dapperWrapper);
         }
 
         [Theory]
@@ -205,17 +222,19 @@
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var product = dapperWrapper.GetRandomProduct(Faker);
-            var originalProductName = product.Name;
+            var productToUpdate = new ProductToUpdate(Faker)
+            {
+                ProductID = product.ProductID
+            };
 
             // Act
-            ModifyProduct(product, sqlDialect);
             var numOfRowsUpdated = await dapperWrapper.ExecuteAsync(
-                product.GenerateUpdateStatementWithoutParameters(sqlDialect),
+                productToUpdate.GenerateUpdateStatementWithoutParameters(sqlDialect),
                 null, true, null, CommandType.Text);
             dapperWrapper.CommitChanges();
 
             // Assert
-            AssertUpdatedFromQuery(numOfRowsUpdated, product, dapperWrapper, originalProductName);
+            AssertUpdatedFromQuery(numOfRowsUpdated, product, productToUpdate, dapperWrapper);
         }
 
         [Theory]
@@ -227,17 +246,19 @@
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var product = dapperWrapper.GetRandomProduct(Faker);
-            var originalProductName = product.Name;
+            var productToUpdate = new ProductToUpdate(Faker)
+            {
+                ProductID = product.ProductID
+            };
 
             // Act
-            ModifyProduct(product, sqlDialect);
             var numOfRowsUpdated = dapperWrapper.Execute(
-                product.GenerateUpdateStatementWithoutParameters(sqlDialect),
+                productToUpdate.GenerateUpdateStatementWithoutParameters(sqlDialect),
                     null, true, null, CommandType.Text);
             dapperWrapper.RollbackChanges();
 
             // Assert
-            AssertNotUpdatedFromQuery(numOfRowsUpdated, product, dapperWrapper, originalProductName);
+            AssertNotUpdatedFromQuery(numOfRowsUpdated, product, productToUpdate, dapperWrapper);
         }
 
         [Theory]
@@ -249,72 +270,75 @@
             // Arrange
             var dapperWrapper = this.GetDapperWrapper(sqlDialect);
             var product = dapperWrapper.GetRandomProduct(Faker);
-            var originalProductName = product.Name;
+            var productToUpdate = new ProductToUpdate(Faker)
+            {
+                ProductID = product.ProductID
+            };
 
             // Act
-            ModifyProduct(product, sqlDialect);
             var numOfRowsUpdated = await dapperWrapper.ExecuteAsync(
-                product.GenerateUpdateStatementWithoutParameters(sqlDialect),
+                productToUpdate.GenerateUpdateStatementWithoutParameters(sqlDialect),
                 null, true, null, CommandType.Text);
             dapperWrapper.RollbackChanges();
 
             // Assert
-            AssertNotUpdatedFromQuery(numOfRowsUpdated, product, dapperWrapper, originalProductName);
+            AssertNotUpdatedFromQuery(numOfRowsUpdated, product, productToUpdate, dapperWrapper);
         }
 
-        private static void AssertUpdated(Product product, DapperWrapper dapperWrapper, string originalProductName)
+
+        private static void AssertUpdated(Product product, ProductToUpdate updatedProduct, bool result, DapperWrapper dapperWrapper)
         {
-            var result = RetrieveUpdatedProduct(dapperWrapper, product.ProductID);
-            result.Any().Should().BeTrue();
-            result.Count.Should().Be(1);
-            var updated = result.Single();
-            updated.Name.Should().NotBeEquivalentTo(originalProductName);
-            product.Name.Should().BeEquivalentTo(updated.Name);
+            result.Should().Be(true);
+            Assert(product, updatedProduct, dapperWrapper, true);
         }
 
-        private static void AssertNotUpdated(Product product, DapperWrapper dapperWrapper, string originalProductName)
+        private static void AssertNotUpdated(Product product, ProductToUpdate updatedProduct, bool result, DapperWrapper dapperWrapper)
         {
-            var result = RetrieveUpdatedProduct(dapperWrapper, product.ProductID);
-            result.Any().Should().BeTrue();
-            result.Count.Should().Be(1);
-            var notUpdated = result.Single();
-            notUpdated.Name.Should().BeEquivalentTo(originalProductName);
-            product.Name.Should().NotBeEquivalentTo(notUpdated.Name);
+            result.Should().Be(true);
+            Assert(product, updatedProduct, dapperWrapper, false);
         }
 
-        private static void AssertUpdatedFromQuery(int numOfRowsUpdated, Product product, DapperWrapper dapperWrapper, string originalProductName)
+        private static void AssertUpdatedFromQuery(int numOfRowsUpdated, Product product, ProductToUpdate updatedProduct, DapperWrapper dapperWrapper)
         {
-            numOfRowsUpdated.Should().Be(1);
-
-            var result = RetrieveUpdatedProduct(dapperWrapper, product.ProductID);
-            result.Any().Should().BeTrue();
-            result.Count.Should().Be(1);
-            var updated = result.Single();
-            updated.Name.Should().NotBeEquivalentTo(originalProductName);
-            product.Name.Should().BeEquivalentTo(updated.Name);
+            var result = numOfRowsUpdated.Equals(1);
+            AssertUpdated(product, updatedProduct, result, dapperWrapper);
         }
 
-        private static void AssertNotUpdatedFromQuery(int numOfRowsUpdated, Product product, DapperWrapper dapperWrapper, string originalProductName)
+        private static void AssertNotUpdatedFromQuery(int numOfRowsUpdated, Product product, ProductToUpdate updatedProduct, DapperWrapper dapperWrapper)
         {
-            numOfRowsUpdated.Should().Be(1);
+            var result = numOfRowsUpdated.Equals(1);
+            AssertNotUpdated(product, updatedProduct, result, dapperWrapper);
+        }
 
-            var result = RetrieveUpdatedProduct(dapperWrapper, product.ProductID);
-            result.Any().Should().BeTrue();
-            result.Count.Should().Be(1);
-            var notUpdated = result.Single();
-            notUpdated.Name.Should().BeEquivalentTo(originalProductName);
-            product.Name.Should().NotBeEquivalentTo(notUpdated.Name);
+        private static void Assert(Product product, ProductToUpdate updatedProduct,
+            DapperWrapper dapperWrapper, bool expectedResult)
+        {
+
+            var entities = RetrieveUpdatedProduct(dapperWrapper, product.ProductID);
+            entities.Should().NotBeNullOrEmpty().And.HaveCount(1);
+            var entity = entities.Single();
+
+            IsModifiedAsExpected(entity, updatedProduct)
+                .Should().Be(expectedResult);
+        }
+
+        internal static bool IsModifiedAsExpected(Product retrievedProduct, ProductToUpdate modifiedProduct)
+        {
+            var differenceInSeconds = (retrievedProduct.ModifiedDate - modifiedProduct.ModifiedDate).TotalSeconds;
+            var costDifference = Math.Abs(retrievedProduct.StandardCost - modifiedProduct.StandardCost);
+
+            int kk = Math.Min(retrievedProduct.StandardCost.Scale, modifiedProduct.StandardCost.Scale);
+            var tolerance = Convert.ToDecimal(1 / Math.Pow(10, kk));
+
+            return (int)differenceInSeconds == 0
+                   && (retrievedProduct.ModifiedDate - DateTime.Now).TotalDays > 30
+                   && costDifference <= tolerance;
         }
 
         private static List<Product> RetrieveUpdatedProduct(DapperWrapper dapperWrapper, int productId)
         {
             FormattableString filter = $"{nameof(Product.ProductID):C} = {productId}";
             return dapperWrapper.FindAsList<Product>(filter);
-        }
-
-        private static void ModifyProduct(Product product, SqlDialect sqlDialect, [CallerMemberName] string callerMethod = "")
-        {
-            product.Name = $"DW-Test-{sqlDialect}-{callerMethod}";
         }
     }
 }

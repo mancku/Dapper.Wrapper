@@ -25,6 +25,30 @@
 
         public DateTime ModifiedDate { get; set; }
         public decimal StandardCost { get; set; }
+
+        internal virtual string GenerateUpdateStatementWithoutParameters(SqlDialect sqlDialect)
+        {
+            var updateProduct = @"UPDATE [Product] SET 
+    [StandardCost] = {0},
+    [ModifiedDate] = '{1}'
+WHERE [ProductID] = {2}
+";
+
+            updateProduct = updateProduct.SwitchDialect(sqlDialect);
+
+            return string.Format(
+                updateProduct,
+                this.StandardCost.ToString(CultureInfo.InvariantCulture),
+                this.ModifiedDate.ToString("yyyy-MM-dd HH:mm:ss"),
+                this.ProductID
+            );
+        }
+
+        internal string GenerateDeleteStatementWithoutParameters(SqlDialect sqlDialect)
+        {
+            var deleteStatement = $"DELETE FROM [Product] WHERE [ProductID] = {this.ProductID}";
+            return deleteStatement.SwitchDialect(sqlDialect);
+        }
     }
 
     [Table("Product")]
@@ -124,7 +148,7 @@
             );
         }
 
-        internal string GenerateUpdateStatementWithoutParameters(SqlDialect sqlDialect)
+        internal override string GenerateUpdateStatementWithoutParameters(SqlDialect sqlDialect)
         {
             var updateProduct = @"UPDATE [Product] SET 
     [Name] = '{0}',
@@ -166,12 +190,6 @@ WHERE [ProductID] = {15}
                 this.ModifiedDate.ToString("yyyy-MM-dd HH:mm:ss"),
                 this.ProductID
             );
-        }
-
-        internal string GenerateDeleteStatementWithoutParameters(SqlDialect sqlDialect)
-        {
-            var deleteStatement = $"DELETE FROM [Product] WHERE [ProductID] = {this.ProductID}";
-            return deleteStatement.SwitchDialect(sqlDialect);
         }
     }
 }
