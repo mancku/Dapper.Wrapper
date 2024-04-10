@@ -510,6 +510,42 @@
         [InlineData(SqlDialect.MsSql)]
         [InlineData(SqlDialect.PostgreSql)]
         [InlineData(SqlDialect.MySql)]
+        public void GetFirst(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var dapperWrapper = this.GetDapperWrapper(sqlDialect);
+            var id = Faker.PickRandom(_testRecords.Keys.ToList());
+            FormattableString filter = $"{nameof(Product.ProductID):C} = {id}";
+
+            // Act
+            var result = dapperWrapper.Get<Product>(filter);
+
+            // Assert
+            AssertGet(result, id);
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public async Task GetFirstAsync(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var dapperWrapper = this.GetDapperWrapper(sqlDialect);
+            var id = Faker.PickRandom(_testRecords.Keys.ToList());
+            FormattableString filter = $"{nameof(Product.ProductID):C} = {id}";
+
+            // Act
+            var result = await dapperWrapper.GetAsync<Product>(filter);
+
+            // Assert
+            AssertGet(result, id);
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
         public void GetWithOptions(SqlDialect sqlDialect)
         {
             // Arrange
@@ -537,6 +573,48 @@
 
             // Act
             var result = await dapperWrapper.GetAsync(product, statement => { });
+
+            // Assert
+            AssertGet(result, id);
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public void GetFirstWithOptions(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var dapperWrapper = this.GetDapperWrapper(sqlDialect);
+            var id = Faker.PickRandom(_testRecords.Keys.ToList());
+            FormattableString filter = $"{nameof(Product.ProductID):C} = {id}";
+
+            // Act
+            var result = dapperWrapper.Get<Product>(statement =>
+            {
+                statement.Where(filter);
+            });
+
+            // Assert
+            AssertGet(result, id);
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public async Task GetFirstAsyncWithOptions(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var dapperWrapper = this.GetDapperWrapper(sqlDialect);
+            var id = Faker.PickRandom(_testRecords.Keys.ToList());
+            FormattableString filter = $"{nameof(Product.ProductID):C} = {id}";
+
+            // Act
+            var result = await dapperWrapper.GetAsync<Product>(statement =>
+            {
+                statement.Where(filter);
+            });
 
             // Assert
             AssertGet(result, id);
@@ -580,6 +658,40 @@
         [InlineData(SqlDialect.MsSql)]
         [InlineData(SqlDialect.PostgreSql)]
         [InlineData(SqlDialect.MySql)]
+        public void NotGetFirst(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var dapperWrapper = this.GetDapperWrapper(sqlDialect);
+            FormattableString filter = $"{nameof(Product.ProductID):C} = {int.MinValue}";
+
+            // Act
+            var result = dapperWrapper.Get<Product>(filter);
+
+            // Assert
+            AssertNotGet(result);
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public async Task NotGetFirstAsync(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var dapperWrapper = this.GetDapperWrapper(sqlDialect);
+            FormattableString filter = $"{nameof(Product.ProductID):C} = {int.MinValue}";
+
+            // Act
+            var result = await dapperWrapper.GetAsync<Product>(filter);
+
+            // Assert
+            AssertNotGet(result);
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
         public void NotGetWithOptions(SqlDialect sqlDialect)
         {
             // Arrange
@@ -605,6 +717,46 @@
 
             // Act
             var result = await dapperWrapper.GetAsync(product, statement => { });
+
+            // Assert
+            AssertNotGet(result);
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public void NotGetFirstWithOptions(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var dapperWrapper = this.GetDapperWrapper(sqlDialect);
+            FormattableString filter = $"{nameof(Product.ProductID):C} = {int.MinValue}";
+
+            // Act
+            var result = dapperWrapper.Get<Product>(statement =>
+            {
+                statement.Where(filter);
+            });
+
+            // Assert
+            AssertNotGet(result);
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public async Task NotGetFirstAsyncWithOptions(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var dapperWrapper = this.GetDapperWrapper(sqlDialect);
+            FormattableString filter = $"{nameof(Product.ProductID):C} = {int.MinValue}";
+
+            // Act
+            var result = await dapperWrapper.GetAsync<Product>(statement =>
+            {
+                statement.Where(filter);
+            });
 
             // Assert
             AssertNotGet(result);

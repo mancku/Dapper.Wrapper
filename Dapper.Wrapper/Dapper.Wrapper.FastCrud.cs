@@ -165,6 +165,39 @@
         }
 
         /// <summary>
+        /// Queries the database for a record based on specified conditions and parameters, allowing customization of the query's behavior and results.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned records.</typeparam>
+        /// <param name="filter">A FormattableString representing the WHERE clause conditions to filter the query results. The word 'WHERE' should not be in it. If null, no filtering is applied.</param>
+        /// <param name="orderBy">A FormattableString specifying the ORDER BY clause to determine the order of the returned records. The words 'ORDER BY' should not be in it. If null, the order is unspecified.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the query should be executed within a transaction. If true, the query is executed as part of a transaction; otherwise, it is executed independently.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the query to execute. If null, the default command timeout is used.</param>
+        /// <param name="top">An optional long value specifying the maximum number of records to return. If null, all matching records are returned.</param>
+        /// <param name="skip">An optional long value indicating the number of records to skip before starting to return the records. This parameter is typically used for pagination. If null, no records are skipped.</param>
+        /// <returns>The first record of type TEntity that match the query criteria. Null if none is found.</returns>
+        public TEntity? Get<TEntity>(FormattableString? filter = null, FormattableString? orderBy = null,
+            bool isTransactional = false, TimeSpan? commandTimeout = null, long? top = null, long? skip = null)
+        {
+            return this.Find<TEntity>(filter, orderBy, isTransactional, commandTimeout, top, skip)
+                .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Queries the database for a record based on specified conditions and parameters, allowing customization of the query's behavior and results.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned records.</typeparam>
+        /// <param name="options">An action that accepts an IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder instance of TEntity, 
+        /// allowing the caller to configure the query options, such as specifying filtering or ordering parameters.</param>
+        /// <returns>The first record of type TEntity that match the query criteria. Null if none is found.</returns>
+        public TEntity? Get<TEntity>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> options)
+        {
+            options = this.OverrideDialectInOptions(options);
+            return this.GetConnection(options)
+                .Find(Transaction, options)
+                .FirstOrDefault();
+        }
+
+        /// <summary>
         /// Asynchronously queries the database for a single record based on its Primary Key(s).
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned record.</typeparam>
@@ -190,6 +223,38 @@
         {
             options = this.OverrideDialectInOptions(options);
             return await this.GetConnection(options).GetAsync(entityKeys, Transaction, options);
+        }
+
+        /// <summary>
+        /// Asynchronously queries the database for a record based on specified conditions and parameters, allowing customization of the query's behavior and results.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned records.</typeparam>
+        /// <param name="filter">A FormattableString representing the WHERE clause conditions to filter the query results. The word 'WHERE' should not be in it. If null, no filtering is applied.</param>
+        /// <param name="orderBy">A FormattableString specifying the ORDER BY clause to determine the order of the returned records. The words 'ORDER BY' should not be in it. If null, the order is unspecified.</param>
+        /// <param name="isTransactional">A boolean value indicating whether the query should be executed within a transaction. If true, the query is executed as part of a transaction; otherwise, it is executed independently.</param>
+        /// <param name="commandTimeout">An optional TimeSpan specifying the maximum amount of time to wait for the query to execute. If null, the default command timeout is used.</param>
+        /// <param name="top">An optional long value specifying the maximum number of records to return. If null, all matching records are returned.</param>
+        /// <param name="skip">An optional long value indicating the number of records to skip before starting to return the records. This parameter is typically used for pagination. If null, no records are skipped.</param>
+        /// <returns>The first record of type TEntity that match the query criteria. Null if none is found.</returns>
+        public async Task<TEntity?> GetAsync<TEntity>(FormattableString? filter = null, FormattableString? orderBy = null,
+            bool isTransactional = false, TimeSpan? commandTimeout = null, long? top = null, long? skip = null)
+        {
+            var result = await this.FindAsync<TEntity>(filter, orderBy, isTransactional, commandTimeout, top, skip);
+            return result.FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Asynchronously queries the database for a record based on specified conditions and parameters, allowing customization of the query's behavior and results.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity being queried. This type determines the structure of the returned records.</typeparam>
+        /// <param name="options">An action that accepts an IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder instance of TEntity, 
+        /// allowing the caller to configure the query options, such as specifying filtering or ordering parameters.</param>
+        /// <returns>The first record of type TEntity that match the query criteria. Null if none is found.</returns>
+        public async Task<TEntity?> GetAsync<TEntity>(Action<IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>> options)
+        {
+            options = this.OverrideDialectInOptions(options);
+            var result = await this.GetConnection(options).FindAsync(Transaction, options);
+            return result.FirstOrDefault();
         }
 
         /// <summary>
