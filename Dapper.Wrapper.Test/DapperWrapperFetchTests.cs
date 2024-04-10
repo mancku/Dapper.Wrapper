@@ -510,6 +510,42 @@
         [InlineData(SqlDialect.MsSql)]
         [InlineData(SqlDialect.PostgreSql)]
         [InlineData(SqlDialect.MySql)]
+        public void GetWithOptions(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var dapperWrapper = this.GetDapperWrapper(sqlDialect);
+            var id = Faker.PickRandom(_testRecords.Keys.ToList());
+            var product = new Product { ProductID = id };
+
+            // Act
+            var result = dapperWrapper.Get(product, statement => { });
+
+            // Assert
+            AssertGet(result, id);
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public async Task GetAsyncWithOptions(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var dapperWrapper = this.GetDapperWrapper(sqlDialect);
+            var id = Faker.PickRandom(_testRecords.Keys.ToList());
+            var product = new Product { ProductID = id };
+
+            // Act
+            var result = await dapperWrapper.GetAsync(product, statement => { });
+
+            // Assert
+            AssertGet(result, id);
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
         public void NotGet(SqlDialect sqlDialect)
         {
             // Arrange
@@ -535,6 +571,40 @@
 
             // Act
             var result = await dapperWrapper.GetAsync(product);
+
+            // Assert
+            AssertNotGet(result);
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public void NotGetWithOptions(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var dapperWrapper = this.GetDapperWrapper(sqlDialect);
+            var product = new Product { ProductID = int.MinValue };
+
+            // Act
+            var result = dapperWrapper.Get(product, statement => { });
+
+            // Assert
+            AssertNotGet(result);
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public async Task NotGetAsyncWithOptions(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var dapperWrapper = this.GetDapperWrapper(sqlDialect);
+            var product = new Product { ProductID = int.MinValue };
+
+            // Act
+            var result = await dapperWrapper.GetAsync(product, statement => { });
 
             // Assert
             AssertNotGet(result);
