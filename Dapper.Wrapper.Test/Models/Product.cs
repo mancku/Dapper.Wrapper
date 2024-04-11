@@ -6,6 +6,7 @@
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Globalization;
+    using System.Text.Json.Serialization;
 
     [Table("Product")]
     public class ProductToUpdate
@@ -82,6 +83,7 @@ WHERE [ProductID] = {2}
 
         public Guid? rowguid { get; set; }
 
+        [JsonIgnore]
         public List<SalesOrderDetail> SalesOrderDetails { get; set; } = [];
 
         internal static Product FromRandomValues(Faker faker)
