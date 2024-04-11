@@ -1,5 +1,6 @@
 ﻿namespace Dapper.Wrapper.Test
 {
+    using SqlManager;
     using FastCrud;
     using FluentAssertions;
     using Models;
@@ -285,6 +286,125 @@
             AssertNotUpdatedFromQuery(numOfRowsUpdated, product, productToUpdate, dapperWrapper);
         }
 
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public async Task UpdateProductSqlManagerAsync(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var sqlManager = this.GetSqlManager(sqlDialect);
+            var product = sqlManager.GetRandomProduct(Faker);
+            var productToUpdate = new ProductToUpdate(Faker)
+            {
+                ProductID = product.ProductID
+            };
+
+            // Act
+            var result = await sqlManager.UpdateEntityAsync(productToUpdate);
+
+            // Assert
+            AssertSqlManagerUpdated(result, product, productToUpdate, sqlManager);
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public async Task UpdateProductSqlManagerTransactionalAsync(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var sqlManager = this.GetSqlManager(sqlDialect);
+            var product = sqlManager.GetRandomProduct(Faker);
+            var productToUpdate = new ProductToUpdate(Faker)
+            {
+                ProductID = product.ProductID
+            };
+
+            // Act
+            var result = await sqlManager.UpdateEntityAsync(productToUpdate, false);
+            sqlManager.CommitChanges();
+
+            // Assert
+            AssertSqlManagerUpdated(result, product, productToUpdate, sqlManager);
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public async Task UpdateProductFailedSqlManagerAsync(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var sqlManager = this.GetSqlManager(sqlDialect);
+            var productToUpdate = new ProductToUpdate(Faker)
+            {
+                ProductID = int.MinValue
+            };
+            DbOperationResult<ProductToUpdate> result = null!;
+            Exception exception = null!;
+
+            // Act
+            try
+            {
+                result = await sqlManager.UpdateEntityAsync(productToUpdate);
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            // Assert
+            result.Should().BeNull();
+            exception.Should().NotBeNull();
+            exception.Message.Should().Be("Update result was false but didn't throw exception");
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public async Task UpdateProductFailedNoThrowSqlManagerAsync(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var sqlManager = this.GetSqlManager(sqlDialect);
+            var product = sqlManager.GetRandomProduct(Faker);
+            var productToUpdate = new ProductToUpdate(Faker)
+            {
+                ProductID = int.MinValue
+            };
+
+            // Act
+            var result = await sqlManager.UpdateEntityAsync(productToUpdate, throwOnError: false);
+
+            // Assert
+            result.Should().NotBeNull();
+            var resultSucceeded = result.Succeeded.Equals(false);
+            AssertNotUpdated(product, productToUpdate, resultSucceeded, sqlManager);
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public async Task RollbackUpdateProductSqlManagerAsync(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var sqlManager = this.GetSqlManager(sqlDialect);
+            var product = sqlManager.GetRandomProduct(Faker);
+            var productToUpdate = new ProductToUpdate(Faker)
+            {
+                ProductID = product.ProductID
+            };
+
+            // Act
+            var result = await sqlManager.UpdateEntityAsync(productToUpdate, false);
+            sqlManager.RollbackChanges();
+
+            // Assert
+            result.Should().NotBeNull();
+            AssertNotUpdated(product, productToUpdate, result.Succeeded, sqlManager);
+        }
 
         private static void AssertUpdated(Product product, ProductToUpdate updatedProduct, bool result, DapperWrapper dapperWrapper)
         {
@@ -310,6 +430,13 @@
             AssertNotUpdated(product, updatedProduct, result, dapperWrapper);
         }
 
+        private static void AssertSqlManagerUpdated(DbOperationResult<ProductToUpdate> result, Product product,
+            ProductToUpdate updatedProduct, DapperWrapperSqlManager sqlManager)
+        {
+            result.Should().NotBeNull();
+            AssertUpdated(product, updatedProduct, result.Succeeded, sqlManager);
+        }
+
         private static void Assert(Product product, ProductToUpdate updatedProduct,
             DapperWrapper dapperWrapper, bool expectedResult)
         {
@@ -327,8 +454,8 @@
             var differenceInSeconds = (retrievedProduct.ModifiedDate - modifiedProduct.ModifiedDate).TotalSeconds;
             var costDifference = Math.Abs(retrievedProduct.StandardCost - modifiedProduct.StandardCost);
 
-            int kk = Math.Min(retrievedProduct.StandardCost.Scale, modifiedProduct.StandardCost.Scale);
-            var tolerance = Convert.ToDecimal(1 / Math.Pow(10, kk));
+            int numOfDecimals = Math.Min(retrievedProduct.StandardCost.Scale, modifiedProduct.StandardCost.Scale);
+            var tolerance = Convert.ToDecimal(1 / Math.Pow(10, numOfDecimals));
 
             return (int)differenceInSeconds == 0
                    && (retrievedProduct.ModifiedDate - DateTime.Now).TotalDays > 30

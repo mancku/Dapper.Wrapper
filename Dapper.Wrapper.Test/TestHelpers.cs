@@ -17,7 +17,7 @@
             return query;
         }
 
-        internal static List<Product> GetRandomProducts(this DapperWrapper dapperWrapper, Faker faker)
+        internal static List<Product> GetRandomProducts(this DapperWrapper dapperWrapper, Faker faker, bool withRelatedSalesOrder = false)
         {
             var products = dapperWrapper.FindAsList<Product>(statement =>
                 {
@@ -29,8 +29,11 @@
                     });
                     // By filtering for an ID bigger than 720, we ensure having some clean records
                     // so fetch tests can rely on them
-                    statement.Where($@"{nameof(Product):T}.{nameof(SalesOrderDetail.ProductID):C} > 720
-AND {nameof(SalesOrderDetail):T}.{nameof(SalesOrderDetail.ProductID):C} IS NULL");
+                    FormattableString filter = $"{nameof(Product):T}.{nameof(SalesOrderDetail.ProductID):C} > 720";
+                    filter = withRelatedSalesOrder
+                        ? (FormattableString)$"{filter} AND {nameof(SalesOrderDetail):T}.{nameof(SalesOrderDetail.ProductID):C} IS NOT NULL"
+                        : (FormattableString)$"{filter} AND {nameof(SalesOrderDetail):T}.{nameof(SalesOrderDetail.ProductID):C} IS NULL";
+                    statement.Where(filter);
                 })
                 .ToList();
 
