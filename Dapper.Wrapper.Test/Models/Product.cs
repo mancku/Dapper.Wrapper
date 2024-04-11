@@ -88,45 +88,56 @@ WHERE [ProductID] = {2}
 
         internal static Product FromRandomValues(Faker faker)
         {
+            var products = FromRandomValues(1, faker);
+            return products.First();
+        }
+
+        internal static List<Product> FromRandomValues(int numOfProductsToGenerate, Faker faker)
+        {
             var sizes = new List<string>
             {
                 "NULL", "38", "40", "42", "44", "46", "48","50", "52", "54", "56",
                 "58", "60", "62", "70", "S", "M", "L", "XL", "XXL", "3XL"
             };
-            var result = new Product
+            var productFaker = new Faker<Product>()
+                    .RuleFor(o => o.ProductID, _ => -1)
+                    .RuleFor(o => o.Name, f => f.Commerce.ProductName())
+                    .RuleFor(o => o.ProductNumber, f => $"DW-Test-{f.Random.Number(4000)}")
+                    .RuleFor(o => o.Color, f => f.Commerce.Color())
+                    .RuleFor(o => o.StandardCost, _ => GetDecimalRandomValue())
+                    .RuleFor(o => o.Size, f => f.PickRandom(sizes))
+                    .RuleFor(o => o.ProductCategoryID, f => f.Random.Number(1, 41))
+                    .RuleFor(o => o.ProductModelID, f => f.Random.Number(1, 128))
+                    .RuleFor(o => o.SellStartDate, f => f.Date.PastDateOnly().ToDateTime(TimeOnly.MinValue))
+                    .RuleFor(o => o.SellEndDate, f => f.Date.SoonDateOnly().ToDateTime(TimeOnly.MinValue))
+                    .RuleFor(o => o.DiscontinuedDate, f => f.Date.FutureDateOnly().ToDateTime(TimeOnly.MinValue))
+                    .RuleFor(o => o.ThumbNailPhoto, _ => null)
+                    .RuleFor(o => o.ThumbnailPhotoFileName, _ => null)
+                    .RuleFor(o => o.rowguid, _ => Guid.NewGuid())
+                    .RuleFor(o => o.ModifiedDate, _ => DateTime.Now)
+                ;
+
+            var products = productFaker.Generate(numOfProductsToGenerate);
+            foreach (var result in products)
             {
-                ProductID = -1,
-                Name = faker.Commerce.ProductName(),
-                ProductNumber = $"DW-Test-{faker.Random.Number(4000)}",
-                Color = faker.Commerce.Color(),
-                StandardCost = GetDecimalRandomValue(),
-                Size = faker.PickRandom(sizes),
-                ProductCategoryID = faker.Random.Number(1, 41),
-                ProductModelID = faker.Random.Number(1, 128),
-                SellStartDate = faker.Date.PastDateOnly().ToDateTime(TimeOnly.MinValue),
-                SellEndDate = faker.Date.SoonDateOnly().ToDateTime(TimeOnly.MinValue),
-                DiscontinuedDate = faker.Date.FutureDateOnly().ToDateTime(TimeOnly.MinValue),
-                ThumbNailPhoto = null,
-                ThumbnailPhotoFileName = null,
-                rowguid = Guid.NewGuid(),
-                ModifiedDate = DateTime.Now
-            };
-            result.ListPrice = faker.Random.Decimal(result.StandardCost);
-            result.Size = result.Size == "NULL" ? null : result.Size;
-            result.Weight = result.Size is null ? null : GetDecimalRandomValue();
-            return result;
+                result.ListPrice = faker.Random.Decimal(result.StandardCost);
+                result.Size = result.Size == "NULL" ? null : result.Size;
+                result.Weight = result.Size is null ? null : GetDecimalRandomValue();
+            }
+
+            return products;
 
             decimal GetDecimalRandomValue()
             {
-                return Convert.ToDecimal(faker.Random.Number(10000)) / 1000m;
+                return Convert.ToDecimal(faker.Random.Number(1, 10000)) / 1000m;
             }
         }
 
         internal string GenerateInsertStatementWithoutParameters(SqlDialect sqlDialect)
         {
-            var insertIntoProduct = "INSERT INTO [Product] " +
-                                       "([Name], [ProductNumber], [Color], [StandardCost], [ListPrice], [Size], [Weight], [ProductCategoryID], [ProductModelID], [SellStartDate], [SellEndDate], [DiscontinuedDate], [ThumbnailPhotoFileName], [rowguid], [ModifiedDate]) " +
-                                       "VALUES ('{0}', '{1}', {2}, {3}, {4}, {5}, {6}, {7}, {8}, '{9}', {10}, {11}, {12}, {13}, '{14}')";
+            var insertIntoProduct = @"INSERT INTO [Product] 
+([Name], [ProductNumber], [Color], [StandardCost], [ListPrice], [Size], [Weight], [ProductCategoryID], [ProductModelID], [SellStartDate], [SellEndDate], [DiscontinuedDate], [ThumbnailPhotoFileName], [rowguid], [ModifiedDate]) 
+VALUES ('{0}', '{1}', {2}, {3}, {4}, {5}, {6}, {7}, {8}, '{9}', {10}, {11}, {12}, {13}, '{14}')";
 
             insertIntoProduct = insertIntoProduct.SwitchDialect(sqlDialect);
 
