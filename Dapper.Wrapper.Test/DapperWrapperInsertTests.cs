@@ -278,7 +278,7 @@
             var originalProductId = product.ProductID;
 
             // Act
-            var result = await sqlManager.InsertEntityAsync(product, false);
+            var result = await sqlManager.InsertEntityAsync(product, manageTransaction: false);
             sqlManager.CommitChanges();
 
             // Assert
@@ -349,7 +349,7 @@
             var originalProductId = product.ProductID;
 
             // Act
-            var result = await sqlManager.InsertEntityAsync(product, false);
+            var result = await sqlManager.InsertEntityAsync(product, manageTransaction: false);
             sqlManager.RollbackChanges();
 
             // Assert

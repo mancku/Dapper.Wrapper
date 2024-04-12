@@ -317,7 +317,7 @@
             var filter = this.GetProductsIdsToUpdate(products, false);
 
             // Act
-            var result = await sqlManager.UpdateEntitiesAsync(products, false);
+            var result = await sqlManager.UpdateEntitiesAsync(products, manageTransaction: false);
             sqlManager.CommitChanges();
 
             // Assert
@@ -407,7 +407,7 @@
             var filter = this.GetProductsIdsToUpdate(products, false);
 
             // Act
-            var result = await sqlManager.UpdateEntitiesAsync(products, false);
+            var result = await sqlManager.UpdateEntitiesAsync(products, manageTransaction: false);
             sqlManager.RollbackChanges();
 
             // Assert

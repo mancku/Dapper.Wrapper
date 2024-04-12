@@ -266,7 +266,7 @@
             var product = sqlManager.GetRandomProduct(Faker);
 
             // Act
-            var result = await sqlManager.DeleteEntityAsync(product, false);
+            var result = await sqlManager.DeleteEntityAsync(product, manageTransaction: false);
             sqlManager.CommitChanges();
 
             // Assert
@@ -333,7 +333,7 @@
             var product = sqlManager.GetRandomProduct(Faker);
 
             // Act
-            var result = await sqlManager.DeleteEntityAsync(product, false);
+            var result = await sqlManager.DeleteEntityAsync(product, manageTransaction: false);
             sqlManager.RollbackChanges();
 
             // Assert

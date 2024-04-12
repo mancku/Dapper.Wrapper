@@ -322,7 +322,7 @@
             };
 
             // Act
-            var result = await sqlManager.UpdateEntityAsync(productToUpdate, false);
+            var result = await sqlManager.UpdateEntityAsync(productToUpdate, manageTransaction: false);
             sqlManager.CommitChanges();
 
             // Assert
@@ -398,7 +398,7 @@
             };
 
             // Act
-            var result = await sqlManager.UpdateEntityAsync(productToUpdate, false);
+            var result = await sqlManager.UpdateEntityAsync(productToUpdate, manageTransaction: false);
             sqlManager.RollbackChanges();
 
             // Assert
