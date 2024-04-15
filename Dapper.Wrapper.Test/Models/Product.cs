@@ -115,6 +115,7 @@ WHERE [ProductID] = {2}
                     .RuleFor(o => o.ThumbnailPhotoFileName, _ => null)
                     .RuleFor(o => o.rowguid, _ => Guid.NewGuid())
                     .RuleFor(o => o.ModifiedDate, _ => DateTime.Now)
+                    .UseSeed(DateTime.Now.Microsecond)
                 ;
 
             var products = productFaker.Generate(numOfProductsToGenerate);
