@@ -1,5 +1,6 @@
 ﻿namespace Dapper.Wrapper.Test
 {
+    using SqlManager;
     using FastCrud;
     using FluentAssertions;
     using Models;
@@ -237,6 +238,108 @@
             AssertNotDeletedFromQuery(numOfRowsDeleted, product, dapperWrapper);
         }
 
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public async Task DeleteProductSqlManagerAsync(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var sqlManager = this.GetSqlManager(sqlDialect);
+            var product = sqlManager.GetRandomProduct(Faker);
+
+            // Act
+            var result = await sqlManager.DeleteEntityAsync(product);
+
+            // Assert
+            AssertDeletedSqlManager(result, sqlManager);
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public async Task DeleteProductSqlManagerTransactionalAsync(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var sqlManager = this.GetSqlManager(sqlDialect);
+            var product = sqlManager.GetRandomProduct(Faker);
+
+            // Act
+            var result = await sqlManager.DeleteEntityAsync(product, manageTransaction: false);
+            sqlManager.CommitChanges();
+
+            // Assert
+            AssertDeletedSqlManager(result, sqlManager);
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public async Task DeleteProductFailedSqlManagerAsync(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var sqlManager = this.GetSqlManager(sqlDialect);
+            var product = sqlManager.GetRandomProduct(Faker);
+            product.ProductID = int.MinValue;
+
+            DbOperationResult<Product> result = null!;
+            Exception exception = null!;
+
+            // Act
+            try
+            {
+                result = await sqlManager.DeleteEntityAsync(product);
+            }
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            // Assert
+            result.Should().BeNull();
+            exception.Should().NotBeNull();
+            exception.Message.Should().Be("Delete result was false but didn't throw exception");
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public async Task DeleteProductFailedNoThrowSqlManagerAsync(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var sqlManager = this.GetSqlManager(sqlDialect);
+            var product = sqlManager.GetRandomProduct(Faker);
+            product.ProductID = int.MinValue;
+
+            // Act
+            var result = await sqlManager.DeleteEntityAsync(product, throwOnError: false);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Succeeded.Should().BeFalse();
+        }
+
+        [Theory]
+        [InlineData(SqlDialect.MsSql)]
+        [InlineData(SqlDialect.PostgreSql)]
+        [InlineData(SqlDialect.MySql)]
+        public async Task RollbackDeleteProductSqlManagerAsync(SqlDialect sqlDialect)
+        {
+            // Arrange
+            var sqlManager = this.GetSqlManager(sqlDialect);
+            var product = sqlManager.GetRandomProduct(Faker);
+
+            // Act
+            var result = await sqlManager.DeleteEntityAsync(product, manageTransaction: false);
+            sqlManager.RollbackChanges();
+
+            // Assert
+            AssertNotDeletedSqlManager(result, sqlManager);
+        }
+
         private static void AssertDeleted(Product product, DapperWrapper dapperWrapper)
         {
             var result = RetrieveDeletedProduct(dapperWrapper, product.ProductID);
@@ -266,6 +369,13 @@
             result.Any().Should().BeFalse();
         }
 
+        private static void AssertDeletedSqlManager(DbOperationResult<Product> result, DapperWrapperSqlManager sqlManager)
+        {
+            result.Should().NotBeNull();
+            result.Succeeded.Should().BeTrue();
+            AssertDeleted(result.Entity, sqlManager);
+        }
+
         private static void AssertNotDeletedFromQuery(int numOfRowsDeleted, Product product, DapperWrapper dapperWrapper)
         {
             var result = RetrieveDeletedProduct(dapperWrapper, product.ProductID);
@@ -281,7 +391,14 @@
 
         private static void AssertProductId(Product product)
         {
-            product.ProductID.Should().BeInRange(680, 999);
+            product.ProductID.Should().BeInRange(720, 999);
+        }
+
+        private static void AssertNotDeletedSqlManager(DbOperationResult<Product> result, DapperWrapperSqlManager sqlManager)
+        {
+            result.Should().NotBeNull();
+            result.Succeeded.Should().BeTrue();
+            AssertNotDeleted(result.Entity, sqlManager);
         }
 
         private static List<Product> RetrieveDeletedProduct(DapperWrapper dapperWrapper, int productId)

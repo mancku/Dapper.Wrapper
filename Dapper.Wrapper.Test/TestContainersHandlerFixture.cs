@@ -4,7 +4,6 @@
     using FluentAssertions;
     using Microsoft.Extensions.Configuration;
     using Models;
-    using System.Configuration;
     using System.Data;
     using System.Text.RegularExpressions;
     using Testcontainers.MsSql;
@@ -13,10 +12,11 @@
 
     public sealed class TestContainersHandlerFixture : IAsyncLifetime
     {
+        public readonly IConfiguration _configuration;
+
         private const string _dataBaseName = "DapperWrapperTests";
         private const string _password = "AVeryS3curePassw0rd!";
         private const int _mssqlPort = 1499;
-        private readonly IConfiguration _configuration;
 
         private readonly MsSqlContainer _msSqlContainer;
         private readonly MySqlContainer _mySqlContainer;
