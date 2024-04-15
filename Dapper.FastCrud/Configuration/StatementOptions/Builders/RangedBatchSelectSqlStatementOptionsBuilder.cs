@@ -18,9 +18,14 @@
     /// Ranged conditional sql options builder for a statement.
     /// </summary>
     internal class RangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>
-        : AggregatedSqlStatementOptionsBuilder<TEntity, IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>, 
+        : AggregatedSqlStatementOptionsBuilder<TEntity, IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>>,
         IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity>
     {
         protected override IRangedBatchSelectSqlSqlStatementOptionsOptionsBuilder<TEntity> Builder => this;
+
+        public RangedBatchSelectSqlSqlStatementOptionsOptionsBuilder()
+        {
+            this.UseTransaction = false;
+        }
     }
 }

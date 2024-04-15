@@ -21,5 +21,10 @@
         , IConditionalSqlStatementOptionsBuilder<TEntity>
     {
         protected override IConditionalSqlStatementOptionsBuilder<TEntity> Builder => this;
+
+        public ConditionalSqlStatementOptionsBuilder()
+        {
+            this.UseTransaction = false;
+        }
     }
 }

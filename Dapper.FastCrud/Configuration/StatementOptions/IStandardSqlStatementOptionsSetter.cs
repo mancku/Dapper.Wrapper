@@ -14,10 +14,17 @@
         /// </summary>
         TStatementOptionsBuilder WithTimeout(TimeSpan? commandTimeout);
 
+        ///// <summary>
+        ///// Attaches the current command to an existing transaction.
+        ///// </summary>
+        //TStatementOptionsBuilder AttachToTransaction(IDbTransaction? transaction);
+
         /// <summary>
-        /// Attaches the current command to an existing transaction.
+        /// Informs if the connection should use a transaction.
         /// </summary>
-        TStatementOptionsBuilder AttachToTransaction(IDbTransaction? transaction);
+        /// <param name="shouldUseTransaction"></param>
+        /// <returns></returns>
+        TStatementOptionsBuilder ShouldUseTransaction(bool shouldUseTransaction);
 
         /// <summary>
         /// Overrides the entity mapping for the current statement.

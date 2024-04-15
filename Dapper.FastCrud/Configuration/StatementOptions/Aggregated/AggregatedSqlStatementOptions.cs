@@ -15,7 +15,7 @@
     internal abstract class AggregatedSqlStatementOptions
     {
         private EntityRegistration? _entityRegistrationOverride;
-        
+
         protected AggregatedSqlStatementOptions(EntityDescriptor entityDescriptor)
         {
             Validate.NotNull(entityDescriptor, nameof(entityDescriptor));
@@ -51,9 +51,14 @@
         public SqlStatementFormatterResolver MainEntityFormatterResolver { get; set; }
 
         /// <summary>
+        /// Whether to use the transaction or not.
+        /// </summary>
+        public bool UseTransaction { get; set; }
+
+        /// <summary>
         /// The transaction to be used by the statement.
         /// </summary>
-        public IDbTransaction? Transaction { get; set; }
+        internal IDbTransaction? Transaction { get; set; }
 
         /// <summary>
         /// When setting this value, you're overriding the default entity used for the entity.

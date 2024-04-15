@@ -6,7 +6,7 @@
     /// Single statement options builder for a single record select.
     /// </summary>
     public interface ISelectSqlStatementOptionsBuilder<TEntity>
-        : IRelationalSqlStatementOptionsSetter<ISelectSqlStatementOptionsBuilder<TEntity>>, 
+        : IRelationalSqlStatementOptionsSetter<ISelectSqlStatementOptionsBuilder<TEntity>>,
         IStandardSqlStatementOptionsSetter<TEntity, ISelectSqlStatementOptionsBuilder<TEntity>>
     {
     }
@@ -19,5 +19,10 @@
         , ISelectSqlStatementOptionsBuilder<TEntity>
     {
         protected override ISelectSqlStatementOptionsBuilder<TEntity> Builder => this;
+
+        public SelectSqlStatementOptionsBuilder()
+        {
+            this.UseTransaction = false;
+        }
     }
 }

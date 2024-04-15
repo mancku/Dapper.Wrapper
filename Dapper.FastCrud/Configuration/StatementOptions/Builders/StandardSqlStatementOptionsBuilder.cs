@@ -6,7 +6,7 @@
     /// Standard sql options builder for a statement.
     /// </summary>
     public interface IStandardSqlStatementOptionsBuilder<TEntity>
-        :IStandardSqlStatementOptionsSetter<TEntity,IStandardSqlStatementOptionsBuilder<TEntity>>
+        : IStandardSqlStatementOptionsSetter<TEntity, IStandardSqlStatementOptionsBuilder<TEntity>>
     {
     }
 
@@ -18,5 +18,10 @@
         , IStandardSqlStatementOptionsBuilder<TEntity>
     {
         protected override IStandardSqlStatementOptionsBuilder<TEntity> Builder => this;
+
+        public StandardSqlStatementOptionsBuilder()
+        {
+            this.UseTransaction = true;
+        }
     }
 }
