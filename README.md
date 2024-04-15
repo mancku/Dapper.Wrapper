@@ -1,42 +1,36 @@
 # Dapper.Wrapper
 
-Dapper.Wrapper is a fork of the popular [Dapper.FastCrud](https://github.com/MoonStorm/FastCrud) library, with an emphasis on managing database connections and transactions. This library aims to make it easier for developers to use Dapper.FastCrud without worrying about the intricacies of connections and transactions, while maintaining the simplicity and performance that Dapper.FastCrud is known for.
+Dapper.Wrapper is a fork of the popular [Dapper.FastCrud](https://github.com/MoonStorm/FastCrud) library, designed to streamline database connection and transaction management while addressing a key limitation in handling multiple database types within the same project. This library aims to empower developers to harness the power of Dapper.FastCrud while abstracting the complexities associated with connection and transaction handling, as well as facilitating seamless interaction with various database systems. Dapper.Wrapper retains the efficiency and straightforwardness that Dapper.FastCrud is celebrated for.
 
-A new Solution called Dapper.Wrapper has been added besides the Dapper.FastCrud one. A new project called **`Dapper.Wrapper`** has been added as well. This project targets [.NET Standard 2.1](https://learn.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-2-1) (And only 2.1) and all .CS files from `Dapper.FastCrud` have been added as Link.
+## Architecture
 
-Doing so enables Dapper.Wrapper to work with (and modify) the internal classes of Dapper.FastCrud, which is needed to hide the `AttachToTransaction` method.
+Dapper.Wrapper introduces a new solution alongside the original Dapper.FastCrud, comprising a dedicated project targeting [.NET Standard 2.1](https://learn.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-2-1). By linking all .CS files from `Dapper.FastCrud`, Dapper.Wrapper gains the ability to interact with and modify Dapper.FastCrud's internal classes. This capability is crucial for enhancing functionality and ensuring a cleaner interface for developers.
 
-## Features
+## Key Features
 
-- Automatically handles connection opening, closing, and transaction management
-- Keeps the original functionality of Dapper.FastCrud intact
+- **Seamless Connection and Transaction Management**: Dapper.Wrapper automates the intricacies of opening, closing, and managing database transactions, letting developers focus on the core logic.
+- **Preservation of Core Functionality**: The original prowess of Dapper.FastCrud remains intact, ensuring you still benefit from its performance and simplicity.
+- **Database Type Handling**: Dapper.Wrapper addresses the limitation of Dapper.FastCrud in handling interactions with different types of databases (MSSQL, MySQL and Postgre SQL) within the same project, ensuring consistent and reliable database operations across varied database systems.
 
 ## Getting Started
 
-To use Dapper.Wrapper, follow these steps:
+Integrating Dapper.Wrapper into your project is straightforward:
 
-1. Clone or download the Dapper.Wrapper repository.
+1. Obtain the Dapper.Wrapper repository via cloning or downloading.
+2. Incorporate the Dapper.Wrapper project into your solution.
+3. Establish a project reference to Dapper.Wrapper in your application.
+4. Utilize Dapper.Wrapper within your code, mirroring the usage patterns of Dapper.FastCrud, with the added benefit of enhanced database type handling.
 
-2. Add the Dapper.Wrapper project to your solution.
+## Enhancements Over Dapper.FastCrud
 
-3. Reference the Dapper.Wrapper project in your application.
+Dapper.Wrapper introduces modifications to elevate the ease of database connection and transaction management:
 
-4. Start using Dapper.Wrapper in your code, just like you would with Dapper.FastCrud.
-
-## Changes from Dapper.FastCrud
-
-Dapper.Wrapper makes a few changes to the original Dapper.FastCrud library to make it easier to manage database connections and transactions:
-
-1. All public classes from Dapper.FastCrud have been set as internal in Dapper.Wrapper. This change is to ensure that the user interacts only with the wrapper classes and not the internal classes from Dapper.FastCrud.
-
-2. The `AttachToTransaction` method has been set as internal. This modification is to hide the complexities of handling transactions and connections from the end user.
-
-3. A new method called `ShouldUseTransaction` has been added. This method allows users to easily decide if they want to use transactions or not.
-
-4. All public methods of Dapper.FastCrud.DapperExtensions.cs file have been modified to receive the transaction object and to Attach the transaction if UseTransaction is true.
-
-5. Constructors have been added to classes in Dapper.FastCrud.Configuration.StatementOptions.Builders, so the property UseTransaction has a default value. It will be true for `ConditionalBulkSqlStatementOptionsBuilder` and for `StandardSqlStatementOptionsBuilder`, otherwise false.
+1. **Encapsulation**: All public classes from Dapper.FastCrud are marked as internal within Dapper.Wrapper, guiding users to interact with the wrapper classes exclusively.
+2. **Simplified Transaction Handling**: The `AttachToTransaction` method is internal, while the new `ShouldUseTransaction` method is public, providing a straightforward mechanism for developers to opt-in or out of transaction usage, and streamlining transaction and connection management for developers.
+4. **Modified DapperExtensions**: Modifications in the `Dapper.FastCrud.DapperExtensions.cs` file ensure that transaction objects are appropriately handled and attached based on the `UseTransaction` flag.
+5. **Enhanced Constructors**: New constructors in `Dapper.FastCrud.Configuration.StatementOptions.Builders` initialize the `UseTransaction` property, setting sensible defaults based on the builder context.
+6. **Robust Database Type Support**: Dapper.Wrapper constructor stores the SQL Dialect. All Dapper.Wrapper methods call to `OverrideStatementDialect` using that Dialect, so every time the Dialect is set accordingly before trying to construct the query.
 
 ## License
 
-Dapper.Wrapper is released under the MIT License. Please see the [LICENSE](LICENSE) file for more information.
+Dapper.Wrapper is available under the MIT License. For detailed licensing information, please refer to the [LICENSE](LICENSE) file.
